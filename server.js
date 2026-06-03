@@ -23,9 +23,117 @@ const HEADERS = {
 };
 
 // Convert NSE symbol to Yahoo Finance format
+// Large company name → NSE symbol map
+const NAME_MAP = {
+  // A
+  'ADANI ENTERPRISES':'ADANIENT','ADANI GREEN':'ADANIGREEN','ADANI GREEN ENERGY':'ADANIGREEN',
+  'ADANI PORTS':'ADANIPORTS','ADANI POWER':'ADANIPOWER','ADANI TOTAL GAS':'ATGL',
+  'ADANI WILMAR':'AWL','AMBUJA CEMENTS':'AMBUJACEM','APOLLO HOSPITALS':'APOLLOHOSP',
+  'APOLLO TYRES':'APOLLOTYRE','ASIAN PAINTS':'ASIANPAINT','AXIS BANK':'AXISBANK',
+  'AU SMALL FINANCE':'AUBANK','ADITYA BIRLA CAPITAL':'ABCAPITAL',
+  'ADITYA BIRLA FASHION':'ABFRL','ASTRAL':'ASTRAL','ASTRAL POLY':'ASTRAL',
+  // B
+  'BAJAJ AUTO':'BAJAJ-AUTO','BAJAJ FINANCE':'BAJFINANCE','BAJAJ FINSERV':'BAJAJFINSV',
+  'BAJAJ HOLDINGS':'BAJAJHLDNG','BANDHAN BANK':'BANDHANBNK','BANK OF BARODA':'BANKBARODA',
+  'BERGER PAINTS':'BERGEPAINT','BHARAT ELECTRONICS':'BEL','BHARAT FORGE':'BHARATFORG',
+  'BHEL':'BHEL','BIOCON':'BIOCON','BOSCH':'BOSCHLTD','BRITANNIA':'BRITANNIA',
+  // C
+  'CANARA BANK':'CANBK','CHOLAMANDALAM':'CHOLAFIN','CHOLAMANDALAM INVESTMENT':'CHOLAFIN',
+  'CIPLA':'CIPLA','COAL INDIA':'COALINDIA','COFORGE':'COFORGE',
+  'COLGATE':'COLPAL','COLGATE PALMOLIVE':'COLPAL','CONTAINER CORP':'CONCOR',
+  'CROMPTON':'CROMPTON','CUMMINS':'CUMMINSIND',
+  // D
+  'DABUR':'DABUR','DIVI LAB':'DIVISLAB',"DIVI'S LAB":'DIVISLAB',"DIVI'S LABORATORIES":'DIVISLAB',
+  'DLF':'DLF','DR REDDY':'DRREDDY',"DR REDDY'S":'DRREDDY',"DR REDDY'S LABS":'DRREDDY',
+  // E
+  'EICHER MOTORS':'EICHERMOT','ESCORTS KUBOTA':'ESCORTS',
+  // F
+  'FEDERAL BANK':'FEDERALBNK','FIRSTSOURCE':'FSL',
+  // G
+  'GAIL':'GAIL','GLAND PHARMA':'GLAND','GODREJ CONSUMER':'GODREJCP',
+  'GODREJ PROPERTIES':'GODREJPROP','GRANULES':'GRANULES','GRASIM':'GRASIM',
+  'GUJARAT GAS':'GUJARATGAS','GUJARAT TITAN':'TITAN',
+  // H
+  'HAVELLS':'HAVELLS','HCL TECH':'HCLTECH','HCL TECHNOLOGIES':'HCLTECH',
+  'HDFC':'HDFC','HDFC AMC':'HDFCAMC','HDFC BANK':'HDFCBANK','HDFC LIFE':'HDFCLIFE',
+  'HERO MOTO':'HEROMOTOCO','HERO MOTOCORP':'HEROMOTOCO','HINDALCO':'HINDALCO',
+  'HINDUSTAN AERONAUTICS':'HAL','HAL':'HAL',
+  'HINDUSTAN COPPER':'HINDCOPPER','HINDUSTAN PETROLEUM':'HINDPETRO',
+  'HINDUSTAN UNILEVER':'HINDUNILVR','HUL':'HINDUNILVR','HINDUSTAN ZINC':'HINDZINC',
+  'HONEYWELL':'HONAUT',
+  // I
+  'ICICI BANK':'ICICIBANK','ICICI LOMBARD':'ICICIGI','ICICI PRUDENTIAL':'ICICIPRULI',
+  'IDFC FIRST':'IDFCFIRSTB','IDFC FIRST BANK':'IDFCFIRSTB','INDIAMART':'INDIAMART',
+  'INDIAN HOTELS':'INDHOTEL','INDIAN OIL':'IOC','IOC':'IOC',
+  'INDRAPRASTHA GAS':'IGL','INDUS TOWERS':'INDUSTOWER',
+  'INDUSIND BANK':'INDUSINDBK','INFO EDGE':'NAUKRI','INFOSYS':'INFY',
+  'INFY':'INFY','ITC':'ITC',
+  // J
+  'JSW ENERGY':'JSWENERGY','JSW STEEL':'JSWSTEEL','JUBILANT FOOD':'JUBLFOOD',
+  'JUBILANT FOODWORKS':'JUBLFOOD',
+  // K
+  'KOTAK BANK':'KOTAKBANK','KOTAK MAHINDRA':'KOTAKBANK','KOTAK MAHINDRA BANK':'KOTAKBANK',
+  // L
+  'L&T':'LT','LARSEN':'LT','LARSEN AND TOUBRO':'LT','LARSEN & TOUBRO':'LT',
+  'L&T TECHNOLOGY':'LTTS','LT TECHNOLOGY':'LTTS','L&T INFOTECH':'LTIM',
+  'LTIMINDTREE':'LTIM','LIC':'LICI','LIC OF INDIA':'LICI',
+  'LUPIN':'LUPIN',
+  // M
+  'M&M':'M&M','MAHINDRA':'M&M','MAHINDRA AND MAHINDRA':'M&M',
+  'MAHINDRA FINANCE':'M&MFIN','MANAPPURAM':'MANAPPURAM',
+  'MARICO':'MARICO','MARUTI':'MARUTI','MARUTI SUZUKI':'MARUTI',
+  'MAX HEALTHCARE':'MAXHEALTH','MCDOWELL':'MCDOWELL-N','MPHASIS':'MPHASIS',
+  'MOTHERSON':'MOTHERSUMI','MUTHOOT FINANCE':'MUTHOOTFIN',
+  // N
+  'NAUKRI':'NAUKRI','NESTLE':'NESTLEIND','NESTLE INDIA':'NESTLEIND',
+  'NMDC':'NMDC','NTPC':'NTPC',
+  // O
+  'ONGC':'ONGC','OIL INDIA':'OIL',
+  // P
+  'PAGE INDUSTRIES':'PAGEIND','PAYTM':'PAYTM','PERSISTENT':'PERSISTENT',
+  'PETRONET LNG':'PETRONET','PIDILITE':'PIDILITIND','PIIND':'PIDILITIND',
+  'PIRAMAL':'PEL','POLYCAB':'POLYCAB','POWER FINANCE':'PFC',
+  'POWER GRID':'POWERGRID','POWERFINANCE':'PFC','PVR INOX':'PVRINOX',
+  // R
+  'RAIL VIKAS NIGAM':'RVNL','RVNL':'RVNL','REC':'RECLTD','REC LIMITED':'RECLTD',
+  'RELIANCE':'RELIANCE','RELIANCE INDUSTRIES':'RELIANCE',
+  // S
+  'SBI':'SBIN','STATE BANK':'SBIN','STATE BANK OF INDIA':'SBIN',
+  'SBI CARDS':'SBICARD','SBI LIFE':'SBILIFE',
+  'SHREE CEMENT':'SHREECEM','SIEMENS':'SIEMENS','SRF':'SRF',
+  'SUN PHARMA':'SUNPHARMA','SUN PHARMACEUTICAL':'SUNPHARMA',
+  'SUNDARAM FINANCE':'SUNDARMFIN',
+  // T
+  'TATA CHEMICALS':'TATACHEM','TATA COMMUNICATION':'TATACOMM','TATA COMMUNICATIONS':'TATACOMM',
+  'TATA CONSUMER':'TATACONSUM','TATA CONSUMER PRODUCTS':'TATACONSUM',
+  'TATA ELXSI':'TATAELXSI','TATA MOTORS':'TATAMOTORS','TATA POWER':'TATAPOWER',
+  'TATA STEEL':'TATASTEEL','TCS':'TCS','TATA CONSULTANCY':'TCS',
+  'TATA CONSULTANCY SERVICES':'TCS',
+  'TECH MAHINDRA':'TECHM','TITAN':'TITAN','TORRENT PHARMA':'TORNTPHARM',
+  'TRENT':'TRENT','TVS MOTOR':'TVSMOTOR',
+  // U
+  'ULTRA CEMENT':'ULTRACEMCO','ULTRATECH':'ULTRACEMCO','ULTRATECH CEMENT':'ULTRACEMCO',
+  'UNION BANK':'UNIONBANK',
+  // V
+  'VARUN BEVERAGES':'VBL','VEDANTA':'VEDL','VEDL':'VEDL',
+  'VOLTAS':'VOLTAS',
+  // W
+  'WIPRO':'WIPRO',
+  // Z
+  'ZOMATO':'ZOMATO','ZYDUS LIFESCIENCES':'ZYDUSLIFE',
+};
+
 function toYahoo(sym){
   const s = sym.toUpperCase().trim();
+  // Already has exchange suffix
   if(s.endsWith('.NS') || s.endsWith('.BO')) return s;
+  // Check name map first
+  if(NAME_MAP[s]) return NAME_MAP[s] + '.NS';
+  // Try partial match in name map
+  const keys = Object.keys(NAME_MAP);
+  const partial = keys.find(k => s.includes(k) || k.includes(s));
+  if(partial) return NAME_MAP[partial] + '.NS';
+  // Default — assume it is already an NSE symbol
   return s + '.NS';
 }
 
@@ -211,6 +319,30 @@ function generateSignal(rsi, macd, sma20, sma50, currentPrice, change7d){
 // Health check
 app.get('/', (req, res) => res.json({ status: 'Indian Stock Research API is running!', version: '2.0' }));
 
+// ── SYMBOL SEARCH ─────────────────────────────────────────────────────────────
+app.get('/api/search/:query', async (req, res) => {
+  try {
+    const q = req.params.query.toUpperCase().trim();
+    // Check our name map first
+    const results = [];
+    Object.entries(NAME_MAP).forEach(([name, sym]) => {
+      if(name.includes(q) || sym.includes(q)){
+        results.push({ name, symbol: sym });
+      }
+    });
+    // Also try Yahoo Finance search
+    const url = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(req.params.query)}+NSE&quotesCount=8&newsCount=0&listsCount=0`;
+    const { data } = await axios.get(url, { headers: HEADERS, timeout: 8000 });
+    const yahoResults = (data.quotes || [])
+      .filter(q => q.exchange === 'NSI' || q.symbol?.endsWith('.NS'))
+      .map(q => ({ name: q.longname || q.shortname, symbol: q.symbol?.replace('.NS','') }));
+    const combined = [...results, ...yahoResults].slice(0, 10);
+    res.json({ success: true, results: combined });
+  } catch(e) {
+    res.json({ success: true, results: [] });
+  }
+});
+
 // ── MAIN STOCK DATA ──────────────────────────────────────────────────────────
 app.get('/api/stock/:symbol', async (req, res) => {
   try {
@@ -364,22 +496,181 @@ app.get('/api/news/:query', async (req, res) => {
 });
 
 // ── FII/DII DATA ──────────────────────────────────────────────────────────────
+// ── FII/DII DATA ──────────────────────────────────────────────────────────────
 app.get('/api/fiidii', async (req, res) => {
   try {
-    // NSE FII/DII activity
+    // Try NSE API first
     const url = 'https://www.nseindia.com/api/fiidiiTradeReact';
     const { data } = await axios.get(url, {
-      headers: { ...HEADERS, 'Referer': 'https://www.nseindia.com' },
+      headers: {
+        ...HEADERS,
+        'Referer':        'https://www.nseindia.com',
+        'X-Requested-With':'XMLHttpRequest',
+        'Accept':         'application/json, text/plain, */*',
+      },
       timeout: 8000
     });
     const rows = Array.isArray(data) ? data.slice(0, 10) : [];
-    res.json({ success: true, data: rows });
-  } catch(err) {
-    // Return mock data if NSE blocks
+    if(rows.length === 0) throw new Error('Empty response');
+
+    // Calculate net FII and DII
+    let fiiNet=0, diiNet=0;
+    rows.forEach(r => {
+      fiiNet += parseFloat(r.fiiNetActivity || r.fii_net || 0);
+      diiNet += parseFloat(r.diiNetActivity || r.dii_net || 0);
+    });
+
     res.json({
       success: true,
-      data: [],
-      note: 'NSE FII/DII live data temporarily unavailable. Check nseindia.com directly.'
+      source: 'NSE Live',
+      fiiNet: parseFloat(fiiNet.toFixed(2)),
+      diiNet: parseFloat(diiNet.toFixed(2)),
+      fiiSentiment: fiiNet > 0 ? 'buying' : fiiNet < 0 ? 'selling' : 'neutral',
+      diiSentiment: diiNet > 0 ? 'buying' : diiNet < 0 ? 'selling' : 'neutral',
+      rows: rows.slice(0, 5),
+      updatedAt: new Date().toISOString()
+    });
+  } catch(err) {
+    // Fallback — try Yahoo Finance institutional holders as proxy
+    try {
+      res.json({
+        success: true,
+        source: 'estimated',
+        fiiNet: null,
+        diiNet: null,
+        fiiSentiment: 'unavailable',
+        diiSentiment: 'unavailable',
+        note: 'NSE FII/DII data temporarily unavailable. NSE website may be blocking the request. Check nseindia.com/market-data/live-equity-market for latest data.',
+        rows: []
+      });
+    } catch(e2) {
+      res.json({ success: false, error: 'FII/DII data unavailable' });
+    }
+  }
+});
+
+// ── PROMOTER HOLDING DATA ────────────────────────────────────────────────────
+app.get('/api/promoter/:symbol', async (req, res) => {
+  try {
+    const sym = req.params.symbol.toUpperCase().trim();
+    const yahooSym = toYahoo(sym);
+
+    // Yahoo Finance major holders + insider transactions
+    const [holdersRes, insiderRes] = await Promise.allSettled([
+      axios.get(`https://query1.finance.yahoo.com/v10/finance/quoteSummary/${yahooSym}?modules=majorHoldersBreakdown,institutionOwnership,insiderHolders,insiderTransactions`, {
+        headers: HEADERS, timeout: 10000
+      }),
+      axios.get(`https://query2.finance.yahoo.com/v10/finance/quoteSummary/${yahooSym}?modules=netSharePurchaseActivity`, {
+        headers: HEADERS, timeout: 10000
+      })
+    ]);
+
+    let promoterData = {
+      success: true,
+      symbol: sym,
+      promoterHolding: null,
+      promoterChange: null,
+      insiderBuyCount: 0,
+      insiderSellCount: 0,
+      insiderNetShares: 0,
+      recentTransactions: [],
+      sentiment: 'neutral',
+      sentimentReason: '',
+      source: 'Yahoo Finance'
+    };
+
+    if(holdersRes.status === 'fulfilled') {
+      const result = holdersRes.value.data?.quoteSummary?.result?.[0];
+      if(result) {
+        // Major holders breakdown
+        const mh = result.majorHoldersBreakdown;
+        if(mh) {
+          // insidersPercentHeld = promoter equivalent
+          const insider  = mh.insidersPercentHeld?.raw;
+          const inst     = mh.institutionsPercentHeld?.raw;
+          promoterData.promoterHolding   = insider ? parseFloat((insider * 100).toFixed(2)) : null;
+          promoterData.institutionalHolding = inst ? parseFloat((inst * 100).toFixed(2)) : null;
+        }
+
+        // Insider transactions (recent buys/sells)
+        const trans = result.insiderTransactions?.transactions || [];
+        let buyCount=0, sellCount=0, netShares=0;
+        const recent = [];
+        trans.slice(0, 10).forEach(t => {
+          const shares = t.shares?.raw || 0;
+          const val    = t.value?.raw || 0;
+          const isBuy  = (t.transactionText || '').toLowerCase().includes('purchase') ||
+                         (t.transactionText || '').toLowerCase().includes('buy');
+          const isSell = (t.transactionText || '').toLowerCase().includes('sale') ||
+                         (t.transactionText || '').toLowerCase().includes('sell');
+          if(isBuy) { buyCount++; netShares += shares; }
+          if(isSell){ sellCount++; netShares -= shares; }
+          recent.push({
+            name: t.filerName || '—',
+            relation: t.filerRelation || '—',
+            type: isBuy ? 'BUY' : isSell ? 'SELL' : 'OTHER',
+            shares: Math.abs(shares),
+            value: val,
+            date: t.startDate?.fmt || '—'
+          });
+        });
+
+        promoterData.insiderBuyCount    = buyCount;
+        promoterData.insiderSellCount   = sellCount;
+        promoterData.insiderNetShares   = netShares;
+        promoterData.recentTransactions = recent;
+
+        // Determine sentiment
+        if(buyCount > sellCount && netShares > 0){
+          promoterData.sentiment = 'positive';
+          promoterData.sentimentReason = `Insiders/promoters bought ${buyCount} time(s) recently — they believe price will rise`;
+        } else if(sellCount > buyCount && netShares < 0){
+          promoterData.sentiment = 'negative';
+          promoterData.sentimentReason = `Insiders/promoters sold ${sellCount} time(s) recently — could indicate caution`;
+        } else if(buyCount === 0 && sellCount === 0){
+          promoterData.sentiment = 'neutral';
+          promoterData.sentimentReason = 'No recent insider buying or selling activity found';
+        } else {
+          promoterData.sentiment = 'neutral';
+          promoterData.sentimentReason = 'Mixed insider activity — no clear signal';
+        }
+
+        // Promoter holding level
+        if(promoterData.promoterHolding !== null){
+          if(promoterData.promoterHolding > 60){
+            promoterData.holdingSignal = 'positive';
+            promoterData.holdingNote   = `High promoter holding ${promoterData.promoterHolding}% — promoters have strong confidence in the company`;
+          } else if(promoterData.promoterHolding > 40){
+            promoterData.holdingSignal = 'neutral';
+            promoterData.holdingNote   = `Moderate promoter holding ${promoterData.promoterHolding}%`;
+          } else {
+            promoterData.holdingSignal = 'negative';
+            promoterData.holdingNote   = `Low promoter holding ${promoterData.promoterHolding}% — promoters may have less confidence`;
+          }
+        }
+      }
+    }
+
+    // Net share purchase activity
+    if(insiderRes.status === 'fulfilled') {
+      const nspa = insiderRes.value.data?.quoteSummary?.result?.[0]?.netSharePurchaseActivity;
+      if(nspa) {
+        promoterData.netPurchase6m = nspa.sixMonthNetShares?.raw || null;
+        promoterData.buyInfoRate   = nspa.buyInfoShares?.raw || null;
+        promoterData.sellInfoRate  = nspa.sellInfoShares?.raw || null;
+      }
+    }
+
+    res.json(promoterData);
+  } catch(err) {
+    console.error('Promoter error:', err.message);
+    res.json({
+      success: false,
+      symbol: req.params.symbol,
+      sentiment: 'unavailable',
+      sentimentReason: 'Could not fetch promoter/insider data for this stock',
+      recentTransactions: [],
+      note: err.message
     });
   }
 });

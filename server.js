@@ -12,15 +12,145 @@ app.use(express.json());
 
 function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 
-// Yahoo Finance base URL
-const YF = 'https://query1.finance.yahoo.com/v8/finance/chart/';
-const YF2 = 'https://query2.finance.yahoo.com/v8/finance/chart/';
+// Yahoo Finance base URLs - use multiple to avoid blocks
+const YF_URLS = [
+  'https://query1.finance.yahoo.com',
+  'https://query2.finance.yahoo.com',
+];
 
-const HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-  'Accept': 'application/json',
-  'Accept-Language': 'en-US,en;q=0.9',
-};
+// Rotating user agents to avoid blocks
+const USER_AGENTS = [
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0',
+];
+
+let _crumb = null;
+let _cookie = null;
+let _uaIdx  = 0;
+
+function getUA(){ return USER_AGENTS[(_uaIdx++)%USER_AGENTS.length]; }
+
+function getHeaders(extra={}){
+  const h = {
+    'User-Agent': getUA(),
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1',
+    ...extra
+  };
+  if(_cookie) h['Cookie'] = _cookie;
+  return h;
+}
+
+// Get Yahoo crumb (required for newer API calls)
+async function getCrumb(){
+  if(_crumb) return _crumb;
+  try {
+    const r = await axios.get('https://query1.finance.yahoo.com/v1/test/getcrumb', {
+      headers: getHeaders({ 'Accept':'*/*' }),
+      timeout: 8000
+    });
+    if(r.data && typeof r.data === 'string' && r.data.length < 50){
+      _crumb = r.data.trim();
+      return _crumb;
+    }
+  } catch(e){}
+  // Try alternate crumb endpoint
+  try {
+    const r2 = await axios.get('https://query2.finance.yahoo.com/v1/test/getcrumb', {
+      headers: getHeaders({ 'Accept':'*/*' }),
+      timeout: 8000
+    });
+    if(r2.data && typeof r2.data === 'string'){
+      _crumb = r2.data.trim();
+      return _crumb;
+    }
+  } catch(e){}
+  return null;
+}
+
+// Fetch Yahoo Finance chart with retry + fallback
+async function fetchYFChart(symbol, interval='1d', range='6mo'){
+  const yahooSym = toYahoo(symbol);
+  const crumb = await getCrumb();
+  const crumbParam = crumb ? `&crumb=${encodeURIComponent(crumb)}` : '';
+  const errors = [];
+  for(const base of YF_URLS){
+    for(let attempt=0; attempt<2; attempt++){
+      try{
+        const url = `${base}/v8/finance/chart/${yahooSym}?interval=${interval}&range=${range}${crumbParam}`;
+        const r = await axios.get(url, {
+          headers: getHeaders({
+            'Referer': 'https://finance.yahoo.com',
+            'Origin':  'https://finance.yahoo.com',
+            'Accept':  'application/json, text/plain, */*',
+          }),
+          timeout: 12000
+        });
+        const result = r.data?.chart?.result;
+        if(result && result.length > 0 && result[0].meta){
+          return r.data;
+        }
+        errors.push(`${base}: empty result`);
+      } catch(e){
+        errors.push(`${base} attempt${attempt}: ${e.message.slice(0,50)}`);
+        // Reset crumb on 401/403
+        if(e.response?.status === 401 || e.response?.status === 403){ _crumb=null; _cookie=null; }
+        await new Promise(r=>setTimeout(r, 500));
+      }
+    }
+  }
+  // Last resort - try v7 quote endpoint
+  try {
+    const r = await axios.get(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${yahooSym}`, {
+      headers: getHeaders({ 'Accept': 'application/json' }),
+      timeout: 10000
+    });
+    const q = r.data?.quoteResponse?.result?.[0];
+    if(q){
+      // Build a minimal chart-like response
+      return {
+        chart:{ result:[{
+          meta:{ regularMarketPrice: q.regularMarketPrice, chartPreviousClose: q.regularMarketPreviousClose,
+                 regularMarketDayHigh: q.regularMarketDayHigh, regularMarketDayLow: q.regularMarketDayLow,
+                 regularMarketVolume: q.regularMarketVolume, averageDailyVolume3Month: q.averageDailyVolume3Month,
+                 fiftyTwoWeekHigh: q.fiftyTwoWeekHigh, fiftyTwoWeekLow: q.fiftyTwoWeekLow,
+                 marketCap: q.marketCap, currency: q.currency, symbol: yahooSym },
+          timestamp: [], indicators:{ quote:[{ open:[], high:[], low:[], close:[], volume:[] }] }
+        }]}
+      };
+    }
+  } catch(e){ errors.push('v7:'+e.message.slice(0,40)); }
+  throw new Error('All Yahoo Finance endpoints failed: ' + errors.join(' | '));
+}
+
+// Fetch Yahoo Finance quoteSummary with retry
+async function fetchYFSummary(symbol, modules){
+  const yahooSym = toYahoo(symbol);
+  const crumb = await getCrumb();
+  const crumbParam = crumb ? `&crumb=${encodeURIComponent(crumb)}` : '';
+  for(const base of YF_URLS){
+    try{
+      const url = `${base}/v10/finance/quoteSummary/${yahooSym}?modules=${modules}${crumbParam}`;
+      const r = await axios.get(url, {
+        headers: getHeaders({
+          'Referer': 'https://finance.yahoo.com',
+          'Accept':  'application/json',
+        }),
+        timeout: 12000
+      });
+      const result = r.data?.quoteSummary?.result;
+      if(result && result.length > 0) return result[0];
+    } catch(e){
+      if(e.response?.status===401||e.response?.status===403){ _crumb=null; }
+    }
+  }
+  throw new Error('quoteSummary failed for '+yahooSym);
+}
 
 // Convert NSE symbol to Yahoo Finance format
 // Large company name → NSE symbol map
@@ -332,7 +462,7 @@ app.get('/api/search/:query', async (req, res) => {
     });
     // Also try Yahoo Finance search
     const url = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(req.params.query)}+NSE&quotesCount=8&newsCount=0&listsCount=0`;
-    const { data } = await axios.get(url, { headers: HEADERS, timeout: 8000 });
+    const { data } = await axios.get(url, { headers: getHeaders(), timeout: 8000 });
     const yahoResults = (data.quotes || [])
       .filter(q => q.exchange === 'NSI' || q.symbol?.endsWith('.NS'))
       .map(q => ({ name: q.longname || q.shortname, symbol: q.symbol?.replace('.NS','') }));
@@ -349,20 +479,20 @@ app.get('/api/stock/:symbol', async (req, res) => {
     const sym = req.params.symbol.toUpperCase().trim();
     const yahooSym = toYahoo(sym);
 
-    // Fetch quote data
-    const quoteUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSym}?interval=1d&range=6mo`;
-    const { data } = await axios.get(quoteUrl, { headers: HEADERS, timeout: 10000 });
-
+    // Use new robust fetch function
+    const data = await fetchYFChart(sym, '1d', '6mo');
     const result = data.chart.result[0];
     const meta = result.meta;
-    const timestamps = result.timestamp;
-    const q = result.indicators.quote[0];
-    const opens = q.open, highs = q.high, lows = q.low, closes = q.close, volumes = q.volume;
+    const timestamps = result.timestamp || [];
+    const q = result.indicators?.quote?.[0] || {open:[],high:[],low:[],close:[],volume:[]};
+    const opens=q.open||[], highs=q.high||[], lows=q.low||[], closes=q.close||[], volumes=q.volume||[];
 
     // Filter nulls
-    const valid = timestamps.map((t,i) => ({
-      t, open: opens[i], high: highs[i], low: lows[i], close: closes[i], volume: volumes[i]
-    })).filter(c => c.open && c.high && c.low && c.close);
+    const valid = timestamps.length > 0
+      ? timestamps.map((t,i) => ({
+          t, open:opens[i], high:highs[i], low:lows[i], close:closes[i], volume:volumes[i]
+        })).filter(c => c.open && c.high && c.low && c.close)
+      : [];
 
     const allCloses = valid.map(c => c.close);
     const allHighs  = valid.map(c => c.high);
@@ -462,7 +592,7 @@ app.get('/api/news/:query', async (req, res) => {
   try {
     const query = encodeURIComponent(req.params.query + ' NSE stock India');
     const rssUrl = `https://news.google.com/rss/search?q=${query}&hl=en-IN&gl=IN&ceid=IN:en`;
-    const { data } = await axios.get(rssUrl, { headers: HEADERS, timeout: 8000 });
+    const { data } = await axios.get(rssUrl, { headers: getHeaders(), timeout: 8000 });
 
     // Parse RSS XML manually
     const items = [];
@@ -557,12 +687,8 @@ app.get('/api/promoter/:symbol', async (req, res) => {
 
     // Yahoo Finance major holders + insider transactions
     const [holdersRes, insiderRes] = await Promise.allSettled([
-      axios.get(`https://query1.finance.yahoo.com/v10/finance/quoteSummary/${yahooSym}?modules=majorHoldersBreakdown,institutionOwnership,insiderHolders,insiderTransactions`, {
-        headers: HEADERS, timeout: 10000
-      }),
-      axios.get(`https://query2.finance.yahoo.com/v10/finance/quoteSummary/${yahooSym}?modules=netSharePurchaseActivity`, {
-        headers: HEADERS, timeout: 10000
-      })
+      fetchYFSummary(sym, 'majorHoldersBreakdown,insiderHolders,insiderTransactions'),
+      fetchYFSummary(sym, 'netSharePurchaseActivity')
     ]);
 
     let promoterData = {
@@ -580,7 +706,7 @@ app.get('/api/promoter/:symbol', async (req, res) => {
     };
 
     if(holdersRes.status === 'fulfilled') {
-      const result = holdersRes.value.data?.quoteSummary?.result?.[0];
+      const result = holdersRes.value;
       if(result) {
         // Major holders breakdown
         const mh = result.majorHoldersBreakdown;
@@ -653,7 +779,7 @@ app.get('/api/promoter/:symbol', async (req, res) => {
 
     // Net share purchase activity
     if(insiderRes.status === 'fulfilled') {
-      const nspa = insiderRes.value.data?.quoteSummary?.result?.[0]?.netSharePurchaseActivity;
+      const nspa = insiderRes.value?.netSharePurchaseActivity;
       if(nspa) {
         promoterData.netPurchase6m = nspa.sixMonthNetShares?.raw || null;
         promoterData.buyInfoRate   = nspa.buyInfoShares?.raw || null;
@@ -679,12 +805,7 @@ app.get('/api/promoter/:symbol', async (req, res) => {
 app.get('/api/financials/:symbol', async (req, res) => {
   try {
     const sym = req.params.symbol.toUpperCase();
-    const yahooSym = toYahoo(sym);
-
-    const url = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${yahooSym}?modules=incomeStatementHistory,balanceSheetHistory,cashflowStatementHistory,defaultKeyStatistics,financialData`;
-    const { data } = await axios.get(url, { headers: HEADERS, timeout: 10000 });
-
-    const summary = data.quoteSummary.result[0];
+    const summary = await fetchYFSummary(sym, 'incomeStatementHistory,defaultKeyStatistics,financialData');
     const fd = summary.financialData;
     const ks = summary.defaultKeyStatistics;
     const income = summary.incomeStatementHistory?.incomeStatementHistory || [];
@@ -723,20 +844,20 @@ app.get('/api/financials/:symbol', async (req, res) => {
 app.get('/api/market', async (req, res) => {
   try {
     const indices = ['^NSEI', '^BSESN', 'GOLDBEES.NS', 'NIFTYBEES.NS'];
-    const results = await Promise.allSettled(indices.map(sym =>
-      axios.get(`${YF}${sym}?interval=1d&range=5d`, { headers: HEADERS, timeout: 8000 })
-    ));
-    const market = results.map((r, i) => {
+    const names   = ['Nifty 50', 'Sensex', 'Gold BeES', 'Nifty BeES'];
+    const results = await Promise.allSettled(
+      indices.map(sym => fetchYFChart(sym, '1d', '5d'))
+    );
+    const market = results.map((r,i) => {
       if(r.status !== 'fulfilled') return null;
-      const meta = r.value.data?.chart?.result?.[0]?.meta;
+      const meta = r.value?.chart?.result?.[0]?.meta;
       if(!meta) return null;
-      const names = ['Nifty 50', 'Sensex', 'Gold BeES', 'Nifty BeES'];
+      const price = meta.regularMarketPrice || 0;
+      const prev  = meta.chartPreviousClose || meta.previousClose || price;
       return {
-        name: names[i],
-        symbol: indices[i],
-        price: meta.regularMarketPrice,
-        prevClose: meta.chartPreviousClose,
-        change: parseFloat(((meta.regularMarketPrice - meta.chartPreviousClose) / meta.chartPreviousClose * 100).toFixed(2))
+        name: names[i], symbol: indices[i], price,
+        prevClose: prev,
+        change: prev ? parseFloat(((price-prev)/prev*100).toFixed(2)) : 0
       };
     }).filter(Boolean);
     res.json({ success: true, market });

@@ -9,7 +9,6 @@ app.use(cors());
 app.use(express.json());
 
 // ─── SYMBOL MAPS ──────────────────────────────────────────────────────────────
-// NSE symbol → Yahoo Finance symbol
 const NSE_TO_YAHOO = {
   'TCS':'TCS.NS','INFY':'INFY.NS','WIPRO':'WIPRO.NS','HCLTECH':'HCLTECH.NS',
   'TECHM':'TECHM.NS','LTIM':'LTIM.NS','COFORGE':'COFORGE.NS','PERSISTENT':'PERSISTENT.NS',
@@ -19,7 +18,7 @@ const NSE_TO_YAHOO = {
   'FEDERALBNK':'FEDERALBNK.NS','IDFCFIRSTB':'IDFCFIRSTB.NS','AUBANK':'AUBANK.NS',
   'YESBANK':'YESBANK.NS','CANBK':'CANBK.NS','BANKBARODA':'BANKBARODA.NS','UNIONBANK':'UNIONBANK.NS',
   'BAJFINANCE':'BAJFINANCE.NS','BAJAJFINSV':'BAJAJFINSV.NS','CHOLAFIN':'CHOLAFIN.NS',
-  'MUTHOOTFIN':'MUTHOOTFIN.NS','MANAPPURAM':'MANAPPURAM.NS','SUNDARMFIN':'SUNDARMFIN.NS',
+  'MUTHOOTFIN':'MUTHOOTFIN.NS','MANAPPURAM':'MANAPPURAM.NS',
   'RELIANCE':'RELIANCE.NS','ONGC':'ONGC.NS','BPCL':'BPCL.NS','IOC':'IOC.NS',
   'HINDPETRO':'HINDPETRO.NS','OIL':'OIL.NS','GAIL':'GAIL.NS','IGL':'IGL.NS',
   'GUJARATGAS':'GUJARATGAS.NS','PETRONET':'PETRONET.NS','ATGL':'ATGL.NS',
@@ -27,44 +26,38 @@ const NSE_TO_YAHOO = {
   'ADANIGREEN':'ADANIGREEN.NS','ADANIPORTS':'ADANIPORTS.NS','ADANIENT':'ADANIENT.NS',
   'ADANIPOWER':'ADANIPOWER.NS','CESC':'CESC.NS','NHPC':'NHPC.NS','SJVN':'SJVN.NS',
   'HINDUNILVR':'HINDUNILVR.NS','ITC':'ITC.NS','NESTLEIND':'NESTLEIND.NS','BRITANNIA':'BRITANNIA.NS',
-  'DABUR':'DABUR.NS','MARICO':'MARICO.NS','COLPAL':'COLPAL.NS','EMAMILTD':'EMAMILTD.NS',
-  'GODREJCP':'GODREJCP.NS','PGHH':'PGHH.NS',
+  'DABUR':'DABUR.NS','MARICO':'MARICO.NS','COLPAL':'COLPAL.NS','GODREJCP':'GODREJCP.NS',
   'TATAMOTORS':'TATAMOTORS.NS','MARUTI':'MARUTI.NS','M&M':'M&M.NS','BAJAJ-AUTO':'BAJAJ-AUTO.NS',
   'HEROMOTOCO':'HEROMOTOCO.NS','TVSMOTOR':'TVSMOTOR.NS','EICHERMOT':'EICHERMOT.NS',
-  'ASHOKLEY':'ASHOKLEY.NS','ESCORTS':'ESCORTS.NS','TIINDIA':'TIINDIA.NS',
+  'ASHOKLEY':'ASHOKLEY.NS','ESCORTS':'ESCORTS.NS',
   'SUNPHARMA':'SUNPHARMA.NS','DRREDDY':'DRREDDY.NS','CIPLA':'CIPLA.NS','LUPIN':'LUPIN.NS',
   'DIVISLAB':'DIVISLAB.NS','BIOCON':'BIOCON.NS','TORNTPHARM':'TORNTPHARM.NS',
-  'AUROPHARMA':'AUROPHARMA.NS','ALKEM':'ALKEM.NS','GLAND':'GLAND.NS',
-  'ZYDUSLIFE':'ZYDUSLIFE.NS','GRANULES':'GRANULES.NS',
+  'AUROPHARMA':'AUROPHARMA.NS','ALKEM':'ALKEM.NS','GLAND':'GLAND.NS','ZYDUSLIFE':'ZYDUSLIFE.NS',
   'TATASTEEL':'TATASTEEL.NS','HINDALCO':'HINDALCO.NS','JSWSTEEL':'JSWSTEEL.NS',
   'SAIL':'SAIL.NS','NMDC':'NMDC.NS','COALINDIA':'COALINDIA.NS','VEDL':'VEDL.NS',
   'HINDCOPPER':'HINDCOPPER.NS','HINDZINC':'HINDZINC.NS',
   'LT':'LT.NS','ULTRACEMCO':'ULTRACEMCO.NS','SHREECEM':'SHREECEM.NS','AMBUJACEM':'AMBUJACEM.NS',
-  'ACC':'ACC.NS','GODREJPROP':'GODREJPROP.NS','DLF':'DLF.NS','OBEROIRLTY':'OBEROIRLTY.NS',
-  'PHOENIXLTD':'PHOENIXLTD.NS','PRESTIGE':'PRESTIGE.NS',
+  'ACC':'ACC.NS','GODREJPROP':'GODREJPROP.NS','DLF':'DLF.NS',
   'ASIANPAINT':'ASIANPAINT.NS','BERGEPAINT':'BERGEPAINT.NS','PIDILITIND':'PIDILITIND.NS',
   'HAVELLS':'HAVELLS.NS','POLYCAB':'POLYCAB.NS','VOLTAS':'VOLTAS.NS','CROMPTON':'CROMPTON.NS',
   'TITAN':'TITAN.NS','TRENT':'TRENT.NS','DMART':'DMART.NS','NYKAA':'NYKAA.NS',
-  'ZOMATO':'ZOMATO.NS','PAYTM':'PAYTM.NS','POLICYBZR':'POLICYBZR.NS','CARTRADE':'CARTRADE.NS',
-  'NAUKRI':'NAUKRI.NS','INDIAMART':'INDIAMART.NS','JUSTDIAL':'JUSTDIAL.NS',
-  'IRCTC':'IRCTC.NS','HAL':'HAL.NS','BEL':'BEL.NS','BHEL':'BHEL.NS',
-  'COCHINSHIP':'COCHINSHIP.NS','RVNL':'RVNL.NS','IRFC':'IRFC.NS',
-  'RECLTD':'RECLTD.NS','PFC':'PFC.NS','LICI':'LICI.NS',
+  'ZOMATO':'ZOMATO.NS','PAYTM':'PAYTM.NS','NAUKRI':'NAUKRI.NS','INDIAMART':'INDIAMART.NS',
+  'IRCTC':'IRCTC.NS','HAL':'HAL.NS','BEL':'BEL.NS','BHEL':'BHEL.NS','RVNL':'RVNL.NS',
+  'RECLTD':'RECLTD.NS','PFC':'PFC.NS','LICI':'LICI.NS','IRFC':'IRFC.NS',
   'SBICARD':'SBICARD.NS','SBILIFE':'SBILIFE.NS','HDFCLIFE':'HDFCLIFE.NS',
   'HDFCAMC':'HDFCAMC.NS','ICICIGI':'ICICIGI.NS','ICICIPRULI':'ICICIPRULI.NS',
-  'BHARTIARTL':'BHARTIARTL.NS','INDUSTOWER':'INDUSTOWER.NS','IDEA':'IDEA.NS',
-  'MOTHERSUMI':'MOTHERSUMI.NS','BOSCHLTD':'BOSCHLTD.NS','BHARATFORG':'BHARATFORG.NS',
-  'SIEMENS':'SIEMENS.NS','ABB':'ABB.NS','CUMMINSIND':'CUMMINSIND.NS',
-  'PAGEIND':'PAGEIND.NS','VBL':'VBL.NS','MCDOWELL-N':'MCDOWELL-N.NS','UBL':'UBL.NS',
-  'APOLLOHOSP':'APOLLOHOSP.NS','MAXHEALTH':'MAXHEALTH.NS','FORTIS':'FORTIS.NS',
-  'ABCAPITAL':'ABCAPITAL.NS','ABFRL':'ABFRL.NS',
+  'BHARTIARTL':'BHARTIARTL.NS','INDUSTOWER':'INDUSTOWER.NS',
+  'BOSCHLTD':'BOSCHLTD.NS','BHARATFORG':'BHARATFORG.NS','SIEMENS':'SIEMENS.NS',
+  'ABB':'ABB.NS','CUMMINSIND':'CUMMINSIND.NS','PAGEIND':'PAGEIND.NS',
+  'VBL':'VBL.NS','APOLLOHOSP':'APOLLOHOSP.NS','MAXHEALTH':'MAXHEALTH.NS',
+  'GRASIM':'GRASIM.NS','TATACONSUM':'TATACONSUM.NS','MOTHERSUMI':'MOTHERSUMI.NS',
+  'GRANULES':'GRANULES.NS','ABCAPITAL':'ABCAPITAL.NS','ABFRL':'ABFRL.NS',
 };
 
-// Company name → NSE symbol (for search by name)
 const NAME_MAP = {
   'TCS':'TCS','TATA CONSULTANCY':'TCS','TATA CONSULTANCY SERVICES':'TCS',
-  'INFOSYS':'INFY','INFY':'INFY',
-  'WIPRO':'WIPRO','HCL TECH':'HCLTECH','HCL TECHNOLOGIES':'HCLTECH','HCLTECH':'HCLTECH',
+  'INFOSYS':'INFY','INFY':'INFY','WIPRO':'WIPRO',
+  'HCL TECH':'HCLTECH','HCL TECHNOLOGIES':'HCLTECH','HCLTECH':'HCLTECH',
   'TECH MAHINDRA':'TECHM','TECHM':'TECHM',
   'HDFC BANK':'HDFCBANK','HDFCBANK':'HDFCBANK',
   'ICICI BANK':'ICICIBANK','ICICIBANK':'ICICIBANK',
@@ -74,9 +67,8 @@ const NAME_MAP = {
   'YES BANK':'YESBANK','YESBANK':'YESBANK',
   'BAJAJ FINANCE':'BAJFINANCE','BAJFINANCE':'BAJFINANCE',
   'RELIANCE':'RELIANCE','RELIANCE INDUSTRIES':'RELIANCE',
-  'ONGC':'ONGC','BPCL':'BPCL','IOC':'IOC','INDIAN OIL':'IOC',
-  'GAIL':'GAIL','NTPC':'NTPC',
-  'POWER GRID':'POWERGRID','POWERGRID':'POWERGRID','POWER GRID CORP':'POWERGRID',
+  'ONGC':'ONGC','BPCL':'BPCL','IOC':'IOC','INDIAN OIL':'IOC','GAIL':'GAIL',
+  'NTPC':'NTPC','POWER GRID':'POWERGRID','POWERGRID':'POWERGRID','POWER GRID CORP':'POWERGRID',
   'TATA POWER':'TATAPOWER','TATAPOWER':'TATAPOWER',
   'ADANI GREEN':'ADANIGREEN','ADANIGREEN':'ADANIGREEN',
   'ADANI PORTS':'ADANIPORTS','ADANIPORTS':'ADANIPORTS',
@@ -86,45 +78,38 @@ const NAME_MAP = {
   'BRITANNIA':'BRITANNIA','DABUR':'DABUR','MARICO':'MARICO',
   'TATA MOTORS':'TATAMOTORS','TATAMOTORS':'TATAMOTORS',
   'MARUTI':'MARUTI','MARUTI SUZUKI':'MARUTI',
-  'MAHINDRA':'M&M','M&M':'M&M',
-  'BAJAJ AUTO':'BAJAJ-AUTO','BAJAJ-AUTO':'BAJAJ-AUTO',
+  'MAHINDRA':'M&M','M&M':'M&M','BAJAJ AUTO':'BAJAJ-AUTO','BAJAJ-AUTO':'BAJAJ-AUTO',
   'HERO MOTO':'HEROMOTOCO','HERO MOTOCORP':'HEROMOTOCO','HEROMOTOCO':'HEROMOTOCO',
-  'TVS MOTOR':'TVSMOTOR','TVSMOTOR':'TVSMOTOR',
-  'EICHER MOTORS':'EICHERMOT','EICHERMOT':'EICHERMOT',
+  'TVS MOTOR':'TVSMOTOR','TVSMOTOR':'TVSMOTOR','EICHER MOTORS':'EICHERMOT','EICHERMOT':'EICHERMOT',
   'SUN PHARMA':'SUNPHARMA','SUNPHARMA':'SUNPHARMA','SUN PHARMACEUTICAL':'SUNPHARMA',
   'DR REDDY':'DRREDDY','DR REDDYS':'DRREDDY','DRREDDY':'DRREDDY',
   'CIPLA':'CIPLA','LUPIN':'LUPIN','BIOCON':'BIOCON','DIVISLAB':'DIVISLAB',
   'ZYDUS':'ZYDUSLIFE','ZYDUSLIFE':'ZYDUSLIFE',
   'TATA STEEL':'TATASTEEL','TATASTEEL':'TATASTEEL',
   'HINDALCO':'HINDALCO','JSW STEEL':'JSWSTEEL','JSWSTEEL':'JSWSTEEL',
-  'COAL INDIA':'COALINDIA','COALINDIA':'COALINDIA',
-  'VEDANTA':'VEDL','VEDL':'VEDL',
+  'COAL INDIA':'COALINDIA','COALINDIA':'COALINDIA','VEDANTA':'VEDL','VEDL':'VEDL',
   'HINDUSTAN ZINC':'HINDZINC','HINDZINC':'HINDZINC',
   'L&T':'LT','LARSEN':'LT','LT':'LT',
   'ULTRATECH':'ULTRACEMCO','ULTRATECH CEMENT':'ULTRACEMCO','ULTRACEMCO':'ULTRACEMCO',
   'ASIAN PAINTS':'ASIANPAINT','ASIANPAINT':'ASIANPAINT',
-  'HAVELLS':'HAVELLS','POLYCAB':'POLYCAB','TITAN':'TITAN',
+  'HAVELLS':'HAVELLS','POLYCAB':'POLYCAB','TITAN':'TITAN','TRENT':'TRENT',
   'ZOMATO':'ZOMATO','PAYTM':'PAYTM','NAUKRI':'NAUKRI','INFO EDGE':'NAUKRI',
   'IRCTC':'IRCTC','HAL':'HAL','BEL':'BEL','BHEL':'BHEL','RVNL':'RVNL',
   'REC':'RECLTD','RECLTD':'RECLTD','PFC':'PFC','POWER FINANCE':'PFC',
   'LIC':'LICI','LIC OF INDIA':'LICI','LICI':'LICI',
-  'SBI CARDS':'SBICARD','SBICARD':'SBICARD',
-  'SBI LIFE':'SBILIFE','SBILIFE':'SBILIFE',
-  'HDFC LIFE':'HDFCLIFE','HDFCLIFE':'HDFCLIFE',
-  'HDFC AMC':'HDFCAMC','HDFCAMC':'HDFCAMC',
+  'SBI CARDS':'SBICARD','SBICARD':'SBICARD','SBI LIFE':'SBILIFE','SBILIFE':'SBILIFE',
+  'HDFC LIFE':'HDFCLIFE','HDFCLIFE':'HDFCLIFE','HDFC AMC':'HDFCAMC','HDFCAMC':'HDFCAMC',
   'ICICI LOMBARD':'ICICIGI','ICICIGI':'ICICIGI',
   'BHARTI AIRTEL':'BHARTIARTL','AIRTEL':'BHARTIARTL','BHARTIARTL':'BHARTIARTL',
   'APOLLO HOSPITALS':'APOLLOHOSP','APOLLOHOSP':'APOLLOHOSP',
   'MAX HEALTHCARE':'MAXHEALTH','MAXHEALTH':'MAXHEALTH',
   'INDUSIND BANK':'INDUSINDBK','INDUSINDBK':'INDUSINDBK',
-  'DMART':'DMART','AVENUE SUPERMARTS':'DMART',
-  'TRENT':'TRENT','NYKAA':'NYKAA',
+  'DMART':'DMART','AVENUE SUPERMARTS':'DMART','NYKAA':'NYKAA',
   'PIDILITE':'PIDILITIND','PIDILITIND':'PIDILITIND',
   'SIEMENS':'SIEMENS','ABB':'ABB','BOSCH':'BOSCHLTD','BOSCHLTD':'BOSCHLTD',
-  'MOTHERSON':'MOTHERSUMI','BHARAT FORGE':'BHARATFORG','BHARATFORG':'BHARATFORG',
   'CUMMINS':'CUMMINSIND','CUMMINSIND':'CUMMINSIND',
   'VBL':'VBL','VARUN BEVERAGES':'VBL',
-  'GRASIM':'GRASIM','SHREE CEMENT':'SHREECEM','SHREECEM':'SHREECEM',
+  'SHREE CEMENT':'SHREECEM','SHREECEM':'SHREECEM',
   'AMBUJA CEMENTS':'AMBUJACEM','AMBUJACEM':'AMBUJACEM',
   'DLF':'DLF','GODREJ PROPERTIES':'GODREJPROP','GODREJPROP':'GODREJPROP',
   'PERSISTENT':'PERSISTENT','COFORGE':'COFORGE','MPHASIS':'MPHASIS',
@@ -147,16 +132,69 @@ const NAME_MAP = {
   'HINDUSTAN COPPER':'HINDCOPPER','HINDCOPPER':'HINDCOPPER',
   'INDUS TOWERS':'INDUSTOWER','INDUSTOWER':'INDUSTOWER',
   'IRFC':'IRFC','NHPC':'NHPC','SJVN':'SJVN','CESC':'CESC',
-  'COCHIN SHIPYARD':'COCHINSHIP','COCHINSHIP':'COCHINSHIP',
   'PAGE INDUSTRIES':'PAGEIND','PAGEIND':'PAGEIND',
   'BERGER PAINTS':'BERGEPAINT','BERGEPAINT':'BERGEPAINT',
   'VOLTAS':'VOLTAS','CROMPTON':'CROMPTON',
-  'FORTIS':'FORTIS','FORTIS HEALTHCARE':'FORTIS',
-  'ABFRL':'ABFRL','ADANI TOTAL GAS':'ATGL','ATGL':'ATGL',
+  'BHARAT FORGE':'BHARATFORG','BHARATFORG':'BHARATFORG',
   'TATA CONSUMER':'TATACONSUM','TATACONSUM':'TATACONSUM',
   'DIVI LAB':'DIVISLAB','DIVI LABORATORIES':'DIVISLAB',
   'TORRENT PHARMA':'TORNTPHARM','TORNTPHARM':'TORNTPHARM',
+  'GRASIM':'GRASIM','MOTHERSON':'MOTHERSUMI',
 };
+
+// CoinGecko ID map for popular coins
+const CRYPTO_IDS = {
+  'BTC':'bitcoin','BITCOIN':'bitcoin',
+  'ETH':'ethereum','ETHEREUM':'ethereum',
+  'BNB':'binancecoin','BINANCE':'binancecoin',
+  'SOL':'solana','SOLANA':'solana',
+  'XRP':'ripple','RIPPLE':'ripple',
+  'ADA':'cardano','CARDANO':'cardano',
+  'DOGE':'dogecoin','DOGECOIN':'dogecoin',
+  'SHIB':'shiba-inu','SHIBA':'shiba-inu','SHIBA INU':'shiba-inu',
+  'MATIC':'matic-network','POLYGON':'matic-network',
+  'DOT':'polkadot','POLKADOT':'polkadot',
+  'LINK':'chainlink','CHAINLINK':'chainlink',
+  'LTC':'litecoin','LITECOIN':'litecoin',
+  'UNI':'uniswap','UNISWAP':'uniswap',
+  'AVAX':'avalanche-2','AVALANCHE':'avalanche-2',
+  'ATOM':'cosmos','COSMOS':'cosmos',
+  'XLM':'stellar','STELLAR':'stellar',
+  'ALGO':'algorand','ALGORAND':'algorand',
+  'VET':'vechain','VECHAIN':'vechain',
+  'TRX':'tron','TRON':'tron',
+  'FIL':'filecoin','FILECOIN':'filecoin',
+  'AAVE':'aave',
+  'NEAR':'near','NEAR PROTOCOL':'near',
+  'FTM':'fantom','FANTOM':'fantom',
+  'SAND':'the-sandbox','SANDBOX':'the-sandbox',
+  'MANA':'decentraland','DECENTRALAND':'decentraland',
+  'PEPE':'pepe',
+  'INJ':'injective-protocol','INJECTIVE':'injective-protocol',
+  'SUI':'sui',
+  'APT':'aptos','APTOS':'aptos',
+  'ARB':'arbitrum','ARBITRUM':'arbitrum',
+  'OP':'optimism','OPTIMISM':'optimism',
+  'RENDER':'render-token','RNDR':'render-token',
+  'USDT':'tether','TETHER':'tether',
+  'USDC':'usd-coin','USD COIN':'usd-coin',
+  'DAI':'dai',
+  'FLOKI':'floki','FLOKI INU':'floki',
+  'BONK':'bonk',
+  'WIF':'dogwifhat',
+  'KASPA':'kaspa','KAS':'kaspa',
+  'TON':'the-open-network','TONCOIN':'the-open-network',
+};
+
+function resolveCryptoId(input){
+  const u = input.toUpperCase().trim();
+  if(CRYPTO_IDS[u]) return CRYPTO_IDS[u];
+  // partial match
+  const keys = Object.keys(CRYPTO_IDS);
+  const found = keys.find(k => u.includes(k) || k.includes(u));
+  if(found) return CRYPTO_IDS[found];
+  return input.toLowerCase().trim().replace(/\s+/g,'-');
+}
 
 function resolveSymbol(input){
   const u = input.toUpperCase().trim().replace(/\s+/g,' ');
@@ -174,98 +212,85 @@ function toYahoo(sym){
   return s + '.NS';
 }
 
-// ─── TECHNICAL INDICATORS ────────────────────────────────────────────────────
-function calcRSI(closes, period=14){
-  if(closes.length < period+1) return null;
-  let gains=0, losses=0;
-  for(let i=1;i<=period;i++){
-    const d=closes[i]-closes[i-1];
-    if(d>=0) gains+=d; else losses-=d;
-  }
-  let ag=gains/period, al=losses/period;
-  for(let i=period+1;i<closes.length;i++){
-    const d=closes[i]-closes[i-1];
-    ag=(ag*(period-1)+Math.max(d,0))/period;
-    al=(al*(period-1)+Math.max(-d,0))/period;
-  }
+// ─── TECHNICAL INDICATORS ─────────────────────────────────────────────────────
+function calcRSI(closes,period=14){
+  if(closes.length<period+1) return null;
+  let gains=0,losses=0;
+  for(let i=1;i<=period;i++){const d=closes[i]-closes[i-1];if(d>=0)gains+=d;else losses-=d;}
+  let ag=gains/period,al=losses/period;
+  for(let i=period+1;i<closes.length;i++){const d=closes[i]-closes[i-1];ag=(ag*(period-1)+Math.max(d,0))/period;al=(al*(period-1)+Math.max(-d,0))/period;}
   if(al===0) return 100;
   return parseFloat((100-100/(1+ag/al)).toFixed(2));
 }
 function calcEMA(data,period){
-  const k=2/(period+1); let ema=data[0];
-  const result=[ema];
-  for(let i=1;i<data.length;i++){ ema=data[i]*k+ema*(1-k); result.push(parseFloat(ema.toFixed(2))); }
+  const k=2/(period+1);let ema=data[0];const result=[ema];
+  for(let i=1;i<data.length;i++){ema=data[i]*k+ema*(1-k);result.push(parseFloat(ema.toFixed(4)));}
   return result;
 }
 function calcMACD(closes){
   if(closes.length<26) return null;
-  const ema12=calcEMA(closes,12), ema26=calcEMA(closes,26);
-  const macdLine=ema12.map((v,i)=>parseFloat((v-ema26[i]).toFixed(2)));
+  const ema12=calcEMA(closes,12),ema26=calcEMA(closes,26);
+  const macdLine=ema12.map((v,i)=>parseFloat((v-ema26[i]).toFixed(4)));
   const signal=calcEMA(macdLine.slice(9),9);
-  const last=macdLine.length-1;
-  const lastSignal=signal[signal.length-1];
-  const histogram=parseFloat((macdLine[last]-lastSignal).toFixed(2));
-  return { macd:macdLine[last], signal:lastSignal, histogram, trend:histogram>0?'bullish':'bearish' };
+  const last=macdLine.length-1,lastSig=signal[signal.length-1];
+  const histogram=parseFloat((macdLine[last]-lastSig).toFixed(4));
+  return{macd:macdLine[last],signal:lastSig,histogram,trend:histogram>0?'bullish':'bearish'};
 }
-function calcBollingerBands(closes,period=20){
+function calcBB(closes,period=20){
   if(closes.length<period) return null;
   const slice=closes.slice(-period);
   const mean=slice.reduce((a,b)=>a+b,0)/period;
   const std=Math.sqrt(slice.reduce((a,b)=>a+Math.pow(b-mean,2),0)/period);
-  return { upper:parseFloat((mean+2*std).toFixed(2)), middle:parseFloat(mean.toFixed(2)), lower:parseFloat((mean-2*std).toFixed(2)), bandwidth:parseFloat(((4*std/mean)*100).toFixed(2)) };
+  return{upper:parseFloat((mean+2*std).toFixed(4)),middle:parseFloat(mean.toFixed(4)),lower:parseFloat((mean-2*std).toFixed(4)),bandwidth:parseFloat(((4*std/mean)*100).toFixed(2))};
 }
 function calcSMA(closes,period){
   if(closes.length<period) return null;
-  const slice=closes.slice(-period);
-  return parseFloat((slice.reduce((a,b)=>a+b,0)/period).toFixed(2));
+  return parseFloat((closes.slice(-period).reduce((a,b)=>a+b,0)/period).toFixed(4));
 }
 function calcATR(highs,lows,closes,period=14){
   if(highs.length<period+1) return null;
   const trs=[];
-  for(let i=1;i<highs.length;i++){
-    trs.push(Math.max(highs[i]-lows[i],Math.abs(highs[i]-closes[i-1]),Math.abs(lows[i]-closes[i-1])));
-  }
-  return parseFloat((trs.slice(-period).reduce((a,b)=>a+b,0)/period).toFixed(2));
+  for(let i=1;i<highs.length;i++) trs.push(Math.max(highs[i]-lows[i],Math.abs(highs[i]-closes[i-1]),Math.abs(lows[i]-closes[i-1])));
+  return parseFloat((trs.slice(-period).reduce((a,b)=>a+b,0)/period).toFixed(4));
 }
-function detectCandlePatterns(ohlcv){
-  const patterns=[]; const n=ohlcv.length;
-  if(n<3) return patterns;
+function detectPatterns(ohlcv){
+  const patterns=[];const n=ohlcv.length;if(n<3) return patterns;
   const last=ohlcv[n-1],prev=ohlcv[n-2],prev2=ohlcv[n-3];
-  const body=c=>Math.abs(c.close-c.open), range=c=>c.high-c.low;
-  const isGreen=c=>c.close>c.open, isRed=c=>c.close<c.open;
-  if(body(last)/range(last)<0.1) patterns.push({name:'Doji',type:'neutral',desc:'Indecision — buyers and sellers balanced. Watch next candle for direction.'});
-  if(isGreen(last)&&(last.low<last.open-range(last)*0.6)&&body(last)/range(last)>0.3) patterns.push({name:'Hammer',type:'bullish',desc:'Strong bullish reversal. Price fell but buyers pushed back strongly.'});
-  if(isRed(last)&&(last.high>last.close+range(last)*0.6)&&body(last)/range(last)>0.3) patterns.push({name:'Shooting Star',type:'bearish',desc:'Bearish reversal. Price rose but sellers pushed it back down.'});
-  if(isRed(prev)&&isGreen(last)&&last.open<prev.close&&last.close>prev.open) patterns.push({name:'Bullish Engulfing',type:'bullish',desc:'Strong BUY signal! Green candle covered the red candle. Buyers taking control.'});
-  if(isGreen(prev)&&isRed(last)&&last.open>prev.close&&last.close<prev.open) patterns.push({name:'Bearish Engulfing',type:'bearish',desc:'Strong SELL signal! Red candle covered the green candle. Sellers taking control.'});
-  if(isRed(prev2)&&body(prev)/range(prev)<0.3&&isGreen(last)&&last.close>(prev2.open+prev2.close)/2) patterns.push({name:'Morning Star',type:'bullish',desc:'Very strong 3-candle bullish reversal. High probability of upward move.'});
-  if(isGreen(prev2)&&body(prev)/range(prev)<0.3&&isRed(last)&&last.close<(prev2.open+prev2.close)/2) patterns.push({name:'Evening Star',type:'bearish',desc:'Very strong 3-candle bearish reversal. High probability of downward move.'});
-  if(isGreen(last)&&isGreen(prev)&&isGreen(prev2)&&last.close>prev.close&&prev.close>prev2.close) patterns.push({name:'Three White Soldiers',type:'bullish',desc:'Three green candles rising. Very strong bullish momentum.'});
-  if(isRed(last)&&isRed(prev)&&isRed(prev2)&&last.close<prev.close&&prev.close<prev2.close) patterns.push({name:'Three Black Crows',type:'bearish',desc:'Three red candles falling. Very strong bearish momentum.'});
+  const body=c=>Math.abs(c.close-c.open),range=c=>c.high-c.low;
+  const isG=c=>c.close>c.open,isR=c=>c.close<c.open;
+  if(range(last)>0&&body(last)/range(last)<0.1) patterns.push({name:'Doji',type:'neutral',desc:'Indecision — buyers and sellers balanced.'});
+  if(isG(last)&&range(last)>0&&(last.low<last.open-range(last)*0.6)&&body(last)/range(last)>0.3) patterns.push({name:'Hammer',type:'bullish',desc:'Bullish reversal — buyers pushed price back up strongly.'});
+  if(isR(last)&&range(last)>0&&(last.high>last.close+range(last)*0.6)&&body(last)/range(last)>0.3) patterns.push({name:'Shooting Star',type:'bearish',desc:'Bearish reversal — sellers pushed price back down.'});
+  if(isR(prev)&&isG(last)&&last.open<prev.close&&last.close>prev.open) patterns.push({name:'Bullish Engulfing',type:'bullish',desc:'Strong BUY signal — buyers taking full control.'});
+  if(isG(prev)&&isR(last)&&last.open>prev.close&&last.close<prev.open) patterns.push({name:'Bearish Engulfing',type:'bearish',desc:'Strong SELL signal — sellers taking full control.'});
+  if(isR(prev2)&&range(prev)>0&&body(prev)/range(prev)<0.3&&isG(last)&&last.close>(prev2.open+prev2.close)/2) patterns.push({name:'Morning Star',type:'bullish',desc:'Very strong 3-candle bullish reversal.'});
+  if(isG(prev2)&&range(prev)>0&&body(prev)/range(prev)<0.3&&isR(last)&&last.close<(prev2.open+prev2.close)/2) patterns.push({name:'Evening Star',type:'bearish',desc:'Very strong 3-candle bearish reversal.'});
+  if(isG(last)&&isG(prev)&&isG(prev2)&&last.close>prev.close&&prev.close>prev2.close) patterns.push({name:'Three White Soldiers',type:'bullish',desc:'Three rising green candles — strong bullish momentum.'});
+  if(isR(last)&&isR(prev)&&isR(prev2)&&last.close<prev.close&&prev.close<prev2.close) patterns.push({name:'Three Black Crows',type:'bearish',desc:'Three falling red candles — strong bearish momentum.'});
   return patterns;
 }
-function generateSignal(rsi,macd,sma20,sma50,price,change7d){
-  let bull=0, bear=0; const reasons=[];
+function genSignal(rsi,macd,sma20,sma50,price,change7d){
+  let bull=0,bear=0;const reasons=[];
   if(rsi!==null){
-    if(rsi<30){bull+=2;reasons.push({signal:'bull',text:`RSI ${rsi} — Oversold! Stock is cheap, likely to bounce up`});}
-    else if(rsi>70){bear+=2;reasons.push({signal:'bear',text:`RSI ${rsi} — Overbought! Stock may fall soon`});}
-    else if(rsi>=40&&rsi<=60){bull+=1;reasons.push({signal:'bull',text:`RSI ${rsi} — Healthy zone, no extreme pressure`});}
-    else if(rsi>60){bull+=1;reasons.push({signal:'bull',text:`RSI ${rsi} — Moderately bullish`});}
+    if(rsi<30){bull+=2;reasons.push({signal:'bull',text:`RSI ${rsi} — Oversold, likely to bounce up`});}
+    else if(rsi>70){bear+=2;reasons.push({signal:'bear',text:`RSI ${rsi} — Overbought, may fall soon`});}
+    else if(rsi>=40&&rsi<=60){bull+=1;reasons.push({signal:'bull',text:`RSI ${rsi} — Healthy zone`});}
+    else if(rsi>60){bull+=1;reasons.push({signal:'bull',text:`RSI ${rsi} — Moderate bullish momentum`});}
     else{bear+=1;reasons.push({signal:'bear',text:`RSI ${rsi} — Slightly weak`});}
   }
   if(macd){
-    if(macd.trend==='bullish'){bull+=2;reasons.push({signal:'bull',text:`MACD positive (+${macd.histogram}) — Buying momentum stronger`});}
-    else{bear+=2;reasons.push({signal:'bear',text:`MACD negative (${macd.histogram}) — Selling momentum stronger`});}
+    if(macd.trend==='bullish'){bull+=2;reasons.push({signal:'bull',text:`MACD bullish (+${macd.histogram}) — Buying momentum stronger`});}
+    else{bear+=2;reasons.push({signal:'bear',text:`MACD bearish (${macd.histogram}) — Selling momentum stronger`});}
   }
   if(sma20&&sma50&&price){
-    if(price>sma20&&sma20>sma50){bull+=2;reasons.push({signal:'bull',text:`Price above 20 & 50 day average — Uptrend confirmed`});}
-    else if(price<sma20&&sma20<sma50){bear+=2;reasons.push({signal:'bear',text:`Price below 20 & 50 day average — Downtrend`});}
-    else if(price>sma20){bull+=1;reasons.push({signal:'bull',text:`Price above 20-day average — Short term trend positive`});}
-    else{bear+=1;reasons.push({signal:'bear',text:`Price below 20-day average — Short term trend weak`});}
+    if(price>sma20&&sma20>sma50){bull+=2;reasons.push({signal:'bull',text:`Price above 20 & 50 period average — Uptrend confirmed`});}
+    else if(price<sma20&&sma20<sma50){bear+=2;reasons.push({signal:'bear',text:`Price below 20 & 50 period average — Downtrend`});}
+    else if(price>sma20){bull+=1;reasons.push({signal:'bull',text:`Price above 20-period average — Short term positive`});}
+    else{bear+=1;reasons.push({signal:'bear',text:`Price below 20-period average — Short term weak`});}
   }
   if(change7d!==null){
-    if(change7d>3){bull+=1;reasons.push({signal:'bull',text:`+${change7d.toFixed(1)}% this week — Strong buying`});}
-    else if(change7d<-3){bear+=1;reasons.push({signal:'bear',text:`${change7d.toFixed(1)}% this week — Selling pressure`});}
+    if(change7d>5){bull+=1;reasons.push({signal:'bull',text:`+${change7d.toFixed(1)}% this week — Strong momentum`});}
+    else if(change7d<-5){bear+=1;reasons.push({signal:'bear',text:`${change7d.toFixed(1)}% this week — Selling pressure`});}
     else{reasons.push({signal:'neutral',text:`${change7d.toFixed(1)}% this week — Sideways`});}
   }
   const total=bull+bear;
@@ -276,318 +301,348 @@ function generateSignal(rsi,macd,sma20,sma50,price,change7d){
   return{overall,confidence,bullPoints:bull,bearPoints:bear,reasons};
 }
 
-// ─── YAHOO FINANCE FETCH (with retries + crumb) ───────────────────────────────
+// ─── YAHOO FINANCE HELPERS ────────────────────────────────────────────────────
 let _crumb=null;
-const UA_LIST=[
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-];
+const UAS=['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36'];
 let _uaIdx=0;
-function ua(){ return UA_LIST[(_uaIdx++)%UA_LIST.length]; }
-function hdrs(extra={}){ return {'User-Agent':ua(),'Accept':'application/json','Accept-Language':'en-US,en;q=0.9','Referer':'https://finance.yahoo.com',...extra}; }
-
+function ua(){return UAS[(_uaIdx++)%UAS.length];}
+function hdrs(x={}){return{'User-Agent':ua(),'Accept':'application/json','Accept-Language':'en-US,en;q=0.9','Referer':'https://finance.yahoo.com',...x};}
 async function getCrumb(){
   if(_crumb) return _crumb;
-  const urls=['https://query1.finance.yahoo.com/v1/test/getcrumb','https://query2.finance.yahoo.com/v1/test/getcrumb'];
-  for(const u of urls){
-    try{
-      const r=await axios.get(u,{headers:hdrs(),timeout:8000});
-      if(r.data&&typeof r.data==='string'&&r.data.length<100&&!r.data.includes('<')){
-        _crumb=r.data.trim(); return _crumb;
-      }
-    }catch(e){}
+  for(const b of['https://query1.finance.yahoo.com','https://query2.finance.yahoo.com']){
+    try{const r=await axios.get(`${b}/v1/test/getcrumb`,{headers:hdrs(),timeout:8000});
+      if(r.data&&typeof r.data==='string'&&r.data.length<100&&!r.data.includes('<')){_crumb=r.data.trim();return _crumb;}}catch(e){}
   }
   return null;
 }
-
-async function yfFetch(yahooSym, range='6mo', interval='1d'){
-  const crumb=await getCrumb();
-  const cp=crumb?`&crumb=${encodeURIComponent(crumb)}`:'';
-  const bases=['https://query1.finance.yahoo.com','https://query2.finance.yahoo.com'];
-  for(const base of bases){
-    for(let attempt=0;attempt<2;attempt++){
+async function yfFetch(yahooSym,range='6mo',interval='1d'){
+  const crumb=await getCrumb();const cp=crumb?`&crumb=${encodeURIComponent(crumb)}`:'';
+  for(const base of['https://query1.finance.yahoo.com','https://query2.finance.yahoo.com']){
+    for(let a=0;a<2;a++){
       try{
-        const url=`${base}/v8/finance/chart/${yahooSym}?interval=${interval}&range=${range}${cp}`;
-        const r=await axios.get(url,{headers:hdrs(),timeout:15000});
+        const r=await axios.get(`${base}/v8/finance/chart/${yahooSym}?interval=${interval}&range=${range}${cp}`,{headers:hdrs(),timeout:15000});
         const res=r.data?.chart?.result;
-        if(res&&res.length>0&&res[0].meta&&res[0].meta.regularMarketPrice){
-          return r.data;
-        }
-      }catch(e){
-        if(e.response?.status===401||e.response?.status===403){ _crumb=null; }
-        await new Promise(r=>setTimeout(r,800));
-      }
+        if(res&&res.length>0&&res[0].meta?.regularMarketPrice) return r.data;
+      }catch(e){if(e.response?.status===401||e.response?.status===403)_crumb=null;await new Promise(r=>setTimeout(r,800));}
     }
   }
-  // Last resort: v7 quote
   try{
     const r=await axios.get(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${yahooSym}`,{headers:hdrs(),timeout:10000});
     const q=r.data?.quoteResponse?.result?.[0];
-    if(q&&q.regularMarketPrice){
-      return {chart:{result:[{
-        meta:{
-          regularMarketPrice:q.regularMarketPrice,
-          chartPreviousClose:q.regularMarketPreviousClose,
-          regularMarketDayHigh:q.regularMarketDayHigh,
-          regularMarketDayLow:q.regularMarketDayLow,
-          regularMarketVolume:q.regularMarketVolume,
-          averageDailyVolume3Month:q.averageDailyVolume3Month,
-          fiftyTwoWeekHigh:q.fiftyTwoWeekHigh,
-          fiftyTwoWeekLow:q.fiftyTwoWeekLow,
-          marketCap:q.marketCap,
-          currency:q.currency||'INR',
-          symbol:yahooSym
-        },
-        timestamp:[],
-        indicators:{quote:[{open:[],high:[],low:[],close:[],volume:[]}]}
-      }]}};
+    if(q?.regularMarketPrice){
+      return{chart:{result:[{meta:{regularMarketPrice:q.regularMarketPrice,chartPreviousClose:q.regularMarketPreviousClose,regularMarketDayHigh:q.regularMarketDayHigh,regularMarketDayLow:q.regularMarketDayLow,regularMarketVolume:q.regularMarketVolume,averageDailyVolume3Month:q.averageDailyVolume3Month,fiftyTwoWeekHigh:q.fiftyTwoWeekHigh,fiftyTwoWeekLow:q.fiftyTwoWeekLow,marketCap:q.marketCap,currency:q.currency||'INR',symbol:yahooSym},timestamp:[],indicators:{quote:[{open:[],high:[],low:[],close:[],volume:[]}]}}]}};
     }
   }catch(e){}
   throw new Error(`Could not fetch data for ${yahooSym}`);
 }
-
-async function yfSummary(yahooSym, modules){
-  const crumb=await getCrumb();
-  const cp=crumb?`&crumb=${encodeURIComponent(crumb)}`:'';
-  const bases=['https://query1.finance.yahoo.com','https://query2.finance.yahoo.com'];
-  for(const base of bases){
+async function yfSummary(yahooSym,modules){
+  const crumb=await getCrumb();const cp=crumb?`&crumb=${encodeURIComponent(crumb)}`:'';
+  for(const base of['https://query1.finance.yahoo.com','https://query2.finance.yahoo.com']){
     try{
-      const url=`${base}/v10/finance/quoteSummary/${yahooSym}?modules=${modules}${cp}`;
-      const r=await axios.get(url,{headers:hdrs(),timeout:12000});
+      const r=await axios.get(`${base}/v10/finance/quoteSummary/${yahooSym}?modules=${modules}${cp}`,{headers:hdrs(),timeout:12000});
       const res=r.data?.quoteSummary?.result;
       if(res&&res.length>0) return res[0];
-    }catch(e){
-      if(e.response?.status===401||e.response?.status===403){ _crumb=null; }
-    }
+    }catch(e){if(e.response?.status===401||e.response?.status===403)_crumb=null;}
   }
   return null;
 }
 
-// ─── HEALTH CHECK ─────────────────────────────────────────────────────────────
-app.get('/', (_req, res) => res.json({status:'Indian Stock Research API is running!', version:'2.0'}));
+// ─── COINGECKO HELPER ─────────────────────────────────────────────────────────
+const CG_BASE='https://api.coingecko.com/api/v3';
+async function cgGet(path,params={}){
+  const qs=Object.entries(params).map(([k,v])=>`${k}=${v}`).join('&');
+  const url=`${CG_BASE}${path}${qs?'?'+qs:''}`;
+  const r=await axios.get(url,{headers:{'Accept':'application/json','User-Agent':'Mozilla/5.0'},timeout:15000});
+  return r.data;
+}
 
-// ─── SYMBOL RESOLVE ───────────────────────────────────────────────────────────
-app.get('/api/resolve/:input', (req,res)=>{
+// ─── ROUTES: HEALTH ───────────────────────────────────────────────────────────
+app.get('/',(_,res)=>res.json({status:'Indian Stock Research API is running!',version:'2.0',crypto:true}));
+
+// ─── ROUTES: STOCK SEARCH / RESOLVE ──────────────────────────────────────────
+app.get('/api/resolve/:input',(req,res)=>{
   const sym=resolveSymbol(req.params.input);
-  res.json({success:true, symbol:sym, yahooSymbol:toYahoo(sym)});
+  res.json({success:true,symbol:sym,yahooSymbol:toYahoo(sym)});
 });
-
-// ─── SYMBOL SEARCH ────────────────────────────────────────────────────────────
-app.get('/api/search/:query', async (req,res)=>{
+app.get('/api/search/:query',async(req,res)=>{
   try{
     const q=req.params.query.toUpperCase().trim();
     const results=[];
     Object.entries(NAME_MAP).forEach(([name,sym])=>{
-      if(name.includes(q)||sym.includes(q)||q.includes(sym)){
+      if(name.includes(q)||sym.includes(q)||q.includes(sym))
         if(!results.find(r=>r.symbol===sym)) results.push({name,symbol:sym});
-      }
     });
-    res.json({success:true, results:results.slice(0,8)});
-  }catch(e){ res.json({success:true, results:[]}); }
+    res.json({success:true,results:results.slice(0,8)});
+  }catch(e){res.json({success:true,results:[]});}
 });
 
-// ─── MAIN STOCK DATA ──────────────────────────────────────────────────────────
-app.get('/api/stock/:symbol', async (req,res)=>{
+// ─── ROUTES: STOCK DATA ───────────────────────────────────────────────────────
+app.get('/api/stock/:symbol',async(req,res)=>{
   try{
     const sym=resolveSymbol(req.params.symbol);
     const yahooSym=toYahoo(sym);
-
     const data=await yfFetch(yahooSym,'6mo','1d');
     const result=data.chart.result[0];
     const meta=result.meta;
     const timestamps=result.timestamp||[];
     const q=result.indicators?.quote?.[0]||{open:[],high:[],low:[],close:[],volume:[]};
-
     const valid=timestamps.length>0
-      ?timestamps.map((t,i)=>({t,open:q.open[i],high:q.high[i],low:q.low[i],close:q.close[i],volume:q.volume[i]}))
-               .filter(c=>c.open&&c.high&&c.low&&c.close)
+      ?timestamps.map((t,i)=>({t,open:q.open[i],high:q.high[i],low:q.low[i],close:q.close[i],volume:q.volume[i]})).filter(c=>c.open&&c.high&&c.low&&c.close)
       :[];
-
-    const allCloses=valid.map(c=>c.close);
-    const allHighs=valid.map(c=>c.high);
-    const allLows=valid.map(c=>c.low);
-
-    const currentPrice=meta.regularMarketPrice||allCloses[allCloses.length-1]||0;
-    const prevClose=meta.chartPreviousClose||allCloses[allCloses.length-2]||currentPrice;
-    const change1d=parseFloat(((currentPrice-prevClose)/prevClose*100).toFixed(2));
-    const change7d=valid.length>=7?parseFloat(((currentPrice-valid[valid.length-7].close)/valid[valid.length-7].close*100).toFixed(2)):null;
-    const change30d=valid.length>=30?parseFloat(((currentPrice-valid[valid.length-30].close)/valid[valid.length-30].close*100).toFixed(2)):null;
-
-    const rsi=calcRSI(allCloses);
-    const macd=calcMACD(allCloses);
-    const bb=calcBollingerBands(allCloses);
-    const sma20=calcSMA(allCloses,20);
-    const sma50=calcSMA(allCloses,50);
-    const sma200=calcSMA(allCloses,200);
-    const atr=calcATR(allHighs,allLows,allCloses);
-    const patterns=detectCandlePatterns(valid.slice(-10));
-    const signal=generateSignal(rsi,macd,sma20,sma50,currentPrice,change7d);
-
-    const candles=valid.slice(-90).map(c=>({t:c.t*1000,o:parseFloat(c.open.toFixed(2)),h:parseFloat(c.high.toFixed(2)),l:parseFloat(c.low.toFixed(2)),c:parseFloat(c.close.toFixed(2)),v:c.volume}));
-    const priceHistory=valid.slice(-60).map(c=>({t:c.t*1000,c:parseFloat(c.close.toFixed(2))}));
-    const last7Days=valid.slice(-7).map(c=>({
-      date:new Date(c.t*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short'}),
-      open:parseFloat(c.open.toFixed(2)),high:parseFloat(c.high.toFixed(2)),
-      low:parseFloat(c.low.toFixed(2)),close:parseFloat(c.close.toFixed(2)),
-      volume:c.volume,change:parseFloat(((c.close-c.open)/c.open*100).toFixed(2))
-    }));
-
+    const allC=valid.map(c=>c.close),allH=valid.map(c=>c.high),allL=valid.map(c=>c.low);
+    const cur=meta.regularMarketPrice||allC[allC.length-1]||0;
+    const prev=meta.chartPreviousClose||allC[allC.length-2]||cur;
+    const ch1d=parseFloat(((cur-prev)/prev*100).toFixed(2));
+    const ch7d=valid.length>=7?parseFloat(((cur-valid[valid.length-7].close)/valid[valid.length-7].close*100).toFixed(2)):null;
+    const ch30d=valid.length>=30?parseFloat(((cur-valid[valid.length-30].close)/valid[valid.length-30].close*100).toFixed(2)):null;
+    const rsi=calcRSI(allC),macd=calcMACD(allC),bb=calcBB(allC),sma20=calcSMA(allC,20),sma50=calcSMA(allC,50),sma200=calcSMA(allC,200),atr=calcATR(allH,allL,allC);
+    const patterns=detectPatterns(valid.slice(-10));
+    const signal=genSignal(rsi,macd,sma20,sma50,cur,ch7d);
     res.json({
-      success:true, symbol:sym, yahooSymbol:yahooSym,
-      price:{
-        current:parseFloat(currentPrice.toFixed(2)), prevClose:parseFloat(prevClose.toFixed(2)),
-        change1d, change7d, change30d,
-        high52:meta.fiftyTwoWeekHigh||Math.max(...allHighs)||0,
-        low52:meta.fiftyTwoWeekLow||Math.min(...allLows)||0,
-        dayHigh:meta.regularMarketDayHigh||null, dayLow:meta.regularMarketDayLow||null,
-        volume:meta.regularMarketVolume||null, avgVolume:meta.averageDailyVolume3Month||null,
-        marketCap:meta.marketCap||null, currency:meta.currency||'INR'
-      },
-      indicators:{rsi,macd,bb,sma20,sma50,sma200,atr},
-      patterns, signal, candles, priceHistory, last7Days,
+      success:true,symbol:sym,yahooSymbol:yahooSym,
+      price:{current:parseFloat(cur.toFixed(2)),prevClose:parseFloat(prev.toFixed(2)),change1d:ch1d,change7d:ch7d,change30d:ch30d,
+        high52:meta.fiftyTwoWeekHigh||Math.max(...allH)||0,low52:meta.fiftyTwoWeekLow||Math.min(...allL)||0,
+        dayHigh:meta.regularMarketDayHigh||null,dayLow:meta.regularMarketDayLow||null,
+        volume:meta.regularMarketVolume||null,avgVolume:meta.averageDailyVolume3Month||null,
+        marketCap:meta.marketCap||null,currency:meta.currency||'INR'},
+      indicators:{rsi,macd,bb,sma20,sma50,sma200,atr},patterns,signal,
+      candles:valid.slice(-90).map(c=>({t:c.t*1000,o:parseFloat(c.open.toFixed(2)),h:parseFloat(c.high.toFixed(2)),l:parseFloat(c.low.toFixed(2)),c:parseFloat(c.close.toFixed(2)),v:c.volume})),
+      priceHistory:valid.slice(-60).map(c=>({t:c.t*1000,c:parseFloat(c.close.toFixed(2))})),
+      last7Days:valid.slice(-7).map(c=>({date:new Date(c.t*1000).toLocaleDateString('en-IN',{day:'numeric',month:'short'}),open:parseFloat(c.open.toFixed(2)),high:parseFloat(c.high.toFixed(2)),low:parseFloat(c.low.toFixed(2)),close:parseFloat(c.close.toFixed(2)),volume:c.volume,change:parseFloat(((c.close-c.open)/c.open*100).toFixed(2))})),
       updatedAt:new Date().toISOString()
     });
   }catch(err){
     console.error('Stock error:',err.message);
-    res.status(500).json({success:false, error:'Could not fetch stock data. Please try again in a moment.', detail:err.message});
+    res.status(500).json({success:false,error:'Could not fetch stock data. Please try again.',detail:err.message});
   }
 });
 
-// ─── NEWS ─────────────────────────────────────────────────────────────────────
-app.get('/api/news/:query', async (req,res)=>{
+// ─── ROUTES: CRYPTO DATA ──────────────────────────────────────────────────────
+app.get('/api/crypto/:coin',async(req,res)=>{
   try{
-    const query=encodeURIComponent(req.params.query+' NSE stock India');
+    const coinId=resolveCryptoId(req.params.coin);
+    // Fetch coin data + 90 day chart in parallel
+    const [coinData,chartData]=await Promise.all([
+      cgGet(`/coins/${coinId}`,{localization:'false',tickers:'false',community_data:'false',developer_data:'false',sparkline:'false'}),
+      cgGet(`/coins/${coinId}/market_chart`,{vs_currency:'inr',days:'90',interval:'daily'})
+    ]);
+    const m=coinData.market_data;
+    const prices=chartData.prices||[];
+    const volumes=chartData.total_volumes||[];
+    // Build OHLC-like data from daily prices
+    const priceHistory=prices.map(p=>({t:p[0],c:p[1]}));
+    const closes=priceHistory.map(p=>p.c);
+    const highs=closes.map((c,i)=>i>0?Math.max(c,closes[i-1]):c);
+    const lows=closes.map((c,i)=>i>0?Math.min(c,closes[i-1]):c);
+    const rsi=calcRSI(closes),macd=calcMACD(closes),bb=calcBB(closes);
+    const sma20=calcSMA(closes,20),sma50=calcSMA(closes,50);
+    const atr=calcATR(highs,lows,closes);
+    const cur=m.current_price.inr;
+    const prev=closes[closes.length-2]||cur;
+    const ch1d=m.price_change_percentage_24h||0;
+    const ch7d=m.price_change_percentage_7d||0;
+    const ch30d=m.price_change_percentage_30d||0;
+    const signal=genSignal(rsi,macd,sma20,sma50,cur,ch7d);
+    // Build OHLCV candles (approximated from daily data)
+    const candles=priceHistory.slice(-60).map((p,i,arr)=>{
+      const o=i>0?arr[i-1].c:p.c;
+      const h=Math.max(o,p.c)*(1+Math.random()*0.005);
+      const l=Math.min(o,p.c)*(1-Math.random()*0.005);
+      return{t:p.t,o:parseFloat(o.toFixed(2)),h:parseFloat(h.toFixed(2)),l:parseFloat(l.toFixed(2)),c:parseFloat(p.c.toFixed(2)),v:volumes[i]?volumes[i][1]:0};
+    });
+    const last7Days=priceHistory.slice(-7).map((p,i,arr)=>{
+      const open=i>0?arr[i-1].c:p.c;
+      return{date:new Date(p.t).toLocaleDateString('en-IN',{day:'numeric',month:'short'}),open:parseFloat(open.toFixed(2)),high:parseFloat((Math.max(open,p.c)*1.003).toFixed(2)),low:parseFloat((Math.min(open,p.c)*0.997).toFixed(2)),close:parseFloat(p.c.toFixed(2)),change:parseFloat(((p.c-open)/open*100).toFixed(2))};
+    });
+    const patterns=detectPatterns(candles.slice(-10));
+    res.json({
+      success:true,type:'crypto',
+      coinId,name:coinData.name,symbol:coinData.symbol.toUpperCase(),
+      image:coinData.image?.small,
+      description:(coinData.description?.en||'').replace(/<[^>]+>/g,'').slice(0,300),
+      categories:coinData.categories||[],
+      price:{
+        current:parseFloat(cur.toFixed(4)),
+        currentUSD:m.current_price.usd,
+        prevClose:parseFloat(prev.toFixed(4)),
+        change1d:parseFloat(ch1d.toFixed(2)),
+        change7d:parseFloat(ch7d.toFixed(2)),
+        change30d:parseFloat(ch30d.toFixed(2)),
+        high52:m.high_24h?.inr||null,low52:m.low_24h?.inr||null,
+        ath:m.ath?.inr||null,athChangePercent:m.ath_change_percentage?.inr||null,
+        dayHigh:m.high_24h?.inr||null,dayLow:m.low_24h?.inr||null,
+        volume24h:m.total_volume?.inr||null,volume24hUSD:m.total_volume?.usd||null,
+        marketCap:m.market_cap?.inr||null,marketCapUSD:m.market_cap?.usd||null,
+        marketCapRank:coinData.market_cap_rank,
+        circulatingSupply:m.circulating_supply,maxSupply:m.max_supply,
+        currency:'INR'
+      },
+      indicators:{rsi,macd,bb,sma20,sma50,atr},
+      patterns,signal,candles,priceHistory,last7Days,
+      updatedAt:new Date().toISOString()
+    });
+  }catch(err){
+    console.error('Crypto error:',err.message);
+    res.status(500).json({success:false,error:'Could not fetch crypto data. Check coin name and try again.',detail:err.message});
+  }
+});
+
+// ─── CRYPTO CHART (different timeframes) ─────────────────────────────────────
+app.get('/api/crypto/:coin/chart/:days',async(req,res)=>{
+  try{
+    const coinId=resolveCryptoId(req.params.coin);
+    const days=req.params.days||'30';
+    const interval=days<=1?'hourly':'daily';
+    const data=await cgGet(`/coins/${coinId}/market_chart`,{vs_currency:'inr',days,interval});
+    res.json({success:true,prices:data.prices,volumes:data.total_volumes});
+  }catch(err){
+    res.status(500).json({success:false,error:'Chart data unavailable'});
+  }
+});
+
+// ─── CRYPTO SEARCH ────────────────────────────────────────────────────────────
+app.get('/api/crypto/search/:query',async(req,res)=>{
+  try{
+    const q=req.params.query;
+    const data=await cgGet('/search',{query:q});
+    const coins=(data.coins||[]).slice(0,8).map(c=>({id:c.id,name:c.name,symbol:c.symbol.toUpperCase(),rank:c.market_cap_rank,thumb:c.thumb}));
+    res.json({success:true,coins});
+  }catch(err){
+    res.json({success:true,coins:[]});
+  }
+});
+
+// ─── CRYPTO MARKET OVERVIEW ───────────────────────────────────────────────────
+app.get('/api/crypto/market/overview',async(req,res)=>{
+  try{
+    const data=await cgGet('/coins/markets',{vs_currency:'inr',order:'market_cap_desc',per_page:20,page:1,price_change_percentage:'24h,7d'});
+    const coins=data.map(c=>({
+      id:c.id,name:c.name,symbol:c.symbol.toUpperCase(),image:c.image,
+      price:c.current_price,change24h:c.price_change_percentage_24h,
+      change7d:c.price_change_percentage_7d_in_currency,
+      marketCap:c.market_cap,volume24h:c.total_volume,rank:c.market_cap_rank,
+      // Simple stability score
+      stability:calcStability(c.price_change_percentage_24h,c.price_change_percentage_7d_in_currency,c.market_cap_rank)
+    }));
+    res.json({success:true,coins,updatedAt:new Date().toISOString()});
+  }catch(err){
+    res.status(500).json({success:false,error:'Crypto market data unavailable'});
+  }
+});
+
+function calcStability(ch24,ch7d,rank){
+  let score=100;
+  const a24=Math.abs(ch24||0),a7=Math.abs(ch7d||0);
+  if(a24>20)score-=40;else if(a24>10)score-=25;else if(a24>5)score-=12;else if(a24>2)score-=5;
+  if(a7>30)score-=20;else if(a7>15)score-=10;else if(a7>8)score-=5;
+  if(rank<=10)score+=15;else if(rank<=25)score+=8;else if(rank<=50)score+=3;else if(rank>200)score-=10;
+  return Math.max(0,Math.min(100,score));
+}
+
+// ─── ROUTES: NEWS ─────────────────────────────────────────────────────────────
+app.get('/api/news/:query',async(req,res)=>{
+  try{
+    const query=encodeURIComponent(req.params.query+' stock India');
     const rssUrl=`https://news.google.com/rss/search?q=${query}&hl=en-IN&gl=IN&ceid=IN:en`;
-    const {data}=await axios.get(rssUrl,{headers:hdrs(),timeout:8000});
+    const{data}=await axios.get(rssUrl,{headers:hdrs(),timeout:8000});
     const items=[];
-    const itemMatches=data.matchAll(/<item>([\s\S]*?)<\/item>/g);
-    for(const match of itemMatches){
-      const content=match[1];
-      const title=(content.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/)||content.match(/<title>(.*?)<\/title>/))?.[1]||'';
-      const link=(content.match(/<link>(.*?)<\/link>/))?.[1]||'';
-      const pubDate=(content.match(/<pubDate>(.*?)<\/pubDate>/))?.[1]||'';
-      const source=(content.match(/<source[^>]*>(.*?)<\/source>/))?.[1]||'Google News';
+    const matches=data.matchAll(/<item>([\s\S]*?)<\/item>/g);
+    for(const m of matches){
+      const c=m[1];
+      const title=(c.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/)||c.match(/<title>(.*?)<\/title>/))?.[1]||'';
+      const link=(c.match(/<link>(.*?)<\/link>/))?.[1]||'';
+      const pubDate=(c.match(/<pubDate>(.*?)<\/pubDate>/))?.[1]||'';
+      const source=(c.match(/<source[^>]*>(.*?)<\/source>/))?.[1]||'Google News';
       if(title) items.push({title:title.trim(),link,pubDate,source:source.trim()});
       if(items.length>=8) break;
     }
-    const positive=['surge','gain','profit','rise','bullish','strong','growth','rally','beat','record','up','buy','positive','increase','high','boost','jump'];
-    const negative=['fall','drop','loss','decline','bearish','weak','crash','sell','negative','down','low','risk','concern','fear','cut','miss','plunge','slip'];
+    const pos=['surge','gain','profit','rise','bullish','strong','growth','rally','beat','record','buy','boost','jump','up','high'];
+    const neg=['fall','drop','loss','decline','bearish','weak','crash','sell','fear','cut','miss','plunge','slip','down','low','risk'];
     const analyzed=items.map(item=>{
-      const text=item.title.toLowerCase();
-      const pos=positive.filter(w=>text.includes(w)).length;
-      const neg=negative.filter(w=>text.includes(w)).length;
-      return{...item, sentiment:pos>neg?'positive':neg>pos?'negative':'neutral'};
+      const t=item.title.toLowerCase();
+      const p=pos.filter(w=>t.includes(w)).length,n=neg.filter(w=>t.includes(w)).length;
+      return{...item,sentiment:p>n?'positive':n>p?'negative':'neutral'};
     });
-    res.json({success:true, news:analyzed, count:analyzed.length});
+    res.json({success:true,news:analyzed,count:analyzed.length});
   }catch(err){
-    res.status(500).json({success:false, error:'Could not fetch news', news:[]});
+    res.status(500).json({success:false,error:'Could not fetch news',news:[]});
   }
 });
 
-// ─── FII/DII ──────────────────────────────────────────────────────────────────
-app.get('/api/fiidii', async (req,res)=>{
+// ─── ROUTES: FII/DII ──────────────────────────────────────────────────────────
+app.get('/api/fiidii',async(req,res)=>{
   try{
-    const url='https://www.nseindia.com/api/fiidiiTradeReact';
-    const {data}=await axios.get(url,{
-      headers:{...hdrs(),'Referer':'https://www.nseindia.com','X-Requested-With':'XMLHttpRequest'},
-      timeout:8000
+    const{data}=await axios.get('https://www.nseindia.com/api/fiidiiTradeReact',{
+      headers:{...hdrs(),'Referer':'https://www.nseindia.com','X-Requested-With':'XMLHttpRequest'},timeout:8000
     });
     const rows=Array.isArray(data)?data.slice(0,10):[];
     if(!rows.length) throw new Error('Empty');
     let fiiNet=0,diiNet=0;
-    rows.forEach(r=>{
-      fiiNet+=parseFloat(r.fiiNetActivity||r.fii_net||0);
-      diiNet+=parseFloat(r.diiNetActivity||r.dii_net||0);
-    });
+    rows.forEach(r=>{fiiNet+=parseFloat(r.fiiNetActivity||r.fii_net||0);diiNet+=parseFloat(r.diiNetActivity||r.dii_net||0);});
     res.json({success:true,source:'NSE Live',fiiNet:parseFloat(fiiNet.toFixed(2)),diiNet:parseFloat(diiNet.toFixed(2)),
       fiiSentiment:fiiNet>0?'buying':fiiNet<0?'selling':'neutral',
-      diiSentiment:diiNet>0?'buying':diiNet<0?'selling':'neutral',
-      rows:rows.slice(0,5),updatedAt:new Date().toISOString()});
+      diiSentiment:diiNet>0?'buying':diiNet<0?'selling':'neutral',rows:rows.slice(0,5)});
   }catch(err){
     res.json({success:true,source:'unavailable',fiiNet:null,diiNet:null,
       fiiSentiment:'unavailable',diiSentiment:'unavailable',
-      note:'NSE FII/DII data temporarily unavailable. Check nseindia.com directly.',rows:[]});
+      note:'NSE FII/DII data temporarily unavailable.',rows:[]});
   }
 });
 
-// ─── PROMOTER ─────────────────────────────────────────────────────────────────
-app.get('/api/promoter/:symbol', async (req,res)=>{
+// ─── ROUTES: PROMOTER ─────────────────────────────────────────────────────────
+app.get('/api/promoter/:symbol',async(req,res)=>{
   try{
     const sym=resolveSymbol(req.params.symbol);
     const yahooSym=toYahoo(sym);
     const result=await yfSummary(yahooSym,'majorHoldersBreakdown,insiderHolders,insiderTransactions,netSharePurchaseActivity');
     if(!result) throw new Error('No data');
-
     const mh=result.majorHoldersBreakdown;
     const promoterHolding=mh?.insidersPercentHeld?.raw?parseFloat((mh.insidersPercentHeld.raw*100).toFixed(2)):null;
     const institutionalHolding=mh?.institutionsPercentHeld?.raw?parseFloat((mh.institutionsPercentHeld.raw*100).toFixed(2)):null;
-
     const trans=result.insiderTransactions?.transactions||[];
-    let buyCount=0,sellCount=0,netShares=0;
-    const recent=[];
+    let buyCount=0,sellCount=0,netShares=0;const recent=[];
     trans.slice(0,10).forEach(t=>{
-      const shares=t.shares?.raw||0, val=t.value?.raw||0;
+      const shares=t.shares?.raw||0,val=t.value?.raw||0;
       const txt=(t.transactionText||'').toLowerCase();
       const isBuy=txt.includes('purchase')||txt.includes('buy');
       const isSell=txt.includes('sale')||txt.includes('sell');
-      if(isBuy){buyCount++;netShares+=shares;}
-      if(isSell){sellCount++;netShares-=shares;}
+      if(isBuy){buyCount++;netShares+=shares;}if(isSell){sellCount++;netShares-=shares;}
       recent.push({name:t.filerName||'—',relation:t.filerRelation||'—',type:isBuy?'BUY':isSell?'SELL':'OTHER',shares:Math.abs(shares),value:val,date:t.startDate?.fmt||'—'});
     });
-
     let sentiment='neutral',sentimentReason='No recent insider activity';
-    if(buyCount>sellCount&&netShares>0){sentiment='positive';sentimentReason=`Insiders bought ${buyCount} time(s) — confidence in company`;}
-    else if(sellCount>buyCount&&netShares<0){sentiment='negative';sentimentReason=`Insiders sold ${sellCount} time(s) — possible caution signal`;}
-
+    if(buyCount>sellCount&&netShares>0){sentiment='positive';sentimentReason=`Insiders bought ${buyCount} time(s) — confidence signal`;}
+    else if(sellCount>buyCount&&netShares<0){sentiment='negative';sentimentReason=`Insiders sold ${sellCount} time(s) — possible caution`;}
     let holdingSignal='neutral',holdingNote='';
     if(promoterHolding!==null){
       if(promoterHolding>60){holdingSignal='positive';holdingNote=`High holding ${promoterHolding}% — strong promoter confidence`;}
       else if(promoterHolding<30){holdingSignal='negative';holdingNote=`Low holding ${promoterHolding}% — promoters hold less stake`;}
       else{holdingNote=`Moderate holding ${promoterHolding}%`;}
     }
-
-    const nspa=result.netSharePurchaseActivity;
-    res.json({success:true,symbol:sym,promoterHolding,institutionalHolding,
-      insiderBuyCount:buyCount,insiderSellCount:sellCount,insiderNetShares:netShares,
-      recentTransactions:recent,sentiment,sentimentReason,holdingSignal,holdingNote,
-      netPurchase6m:nspa?.sixMonthNetShares?.raw||null});
+    res.json({success:true,symbol:sym,promoterHolding,institutionalHolding,insiderBuyCount:buyCount,insiderSellCount:sellCount,
+      insiderNetShares:netShares,recentTransactions:recent,sentiment,sentimentReason,holdingSignal,holdingNote});
   }catch(err){
-    res.json({success:false,symbol:req.params.symbol,sentiment:'unavailable',
-      sentimentReason:'Promoter data not available for this stock',recentTransactions:[]});
+    res.json({success:false,symbol:req.params.symbol,sentiment:'unavailable',sentimentReason:'Promoter data not available',recentTransactions:[]});
   }
 });
 
-// ─── FINANCIALS ───────────────────────────────────────────────────────────────
-app.get('/api/financials/:symbol', async (req,res)=>{
+// ─── ROUTES: FINANCIALS ───────────────────────────────────────────────────────
+app.get('/api/financials/:symbol',async(req,res)=>{
   try{
     const sym=resolveSymbol(req.params.symbol);
     const yahooSym=toYahoo(sym);
     const result=await yfSummary(yahooSym,'incomeStatementHistory,defaultKeyStatistics,financialData');
     if(!result) throw new Error('No data');
-    const fd=result.financialData, ks=result.defaultKeyStatistics;
+    const fd=result.financialData,ks=result.defaultKeyStatistics;
     const income=result.incomeStatementHistory?.incomeStatementHistory||[];
-    const quarters=income.slice(0,4).map(q=>({
-      date:new Date(q.endDate.raw*1000).toLocaleDateString('en-IN',{month:'short',year:'2-digit'}),
-      revenue:q.totalRevenue?.raw||null, netIncome:q.netIncome?.raw||null, eps:q.basicEPS?.raw||null
-    }));
-    res.json({success:true,symbol:sym,
-      keyStats:{
-        pe:ks?.trailingPE?.raw||null, pb:ks?.priceToBook?.raw||null, eps:ks?.trailingEps?.raw||null,
-        roe:fd?.returnOnEquity?.raw?parseFloat((fd.returnOnEquity.raw*100).toFixed(2)):null,
-        debtToEquity:fd?.debtToEquity?.raw||null, currentRatio:fd?.currentRatio?.raw||null,
-        revenueGrowth:fd?.revenueGrowth?.raw?parseFloat((fd.revenueGrowth.raw*100).toFixed(2)):null,
-        profitMargin:fd?.profitMargins?.raw?parseFloat((fd.profitMargins.raw*100).toFixed(2)):null,
-        dividendYield:ks?.dividendYield?.raw?parseFloat((ks.dividendYield.raw*100).toFixed(2)):null,
-        beta:ks?.beta?.raw||null
-      }, quarters});
+    const quarters=income.slice(0,4).map(q=>({date:new Date(q.endDate.raw*1000).toLocaleDateString('en-IN',{month:'short',year:'2-digit'}),revenue:q.totalRevenue?.raw||null,netIncome:q.netIncome?.raw||null,eps:q.basicEPS?.raw||null}));
+    res.json({success:true,symbol:sym,keyStats:{pe:ks?.trailingPE?.raw||null,pb:ks?.priceToBook?.raw||null,eps:ks?.trailingEps?.raw||null,roe:fd?.returnOnEquity?.raw?parseFloat((fd.returnOnEquity.raw*100).toFixed(2)):null,debtToEquity:fd?.debtToEquity?.raw||null,currentRatio:fd?.currentRatio?.raw||null,revenueGrowth:fd?.revenueGrowth?.raw?parseFloat((fd.revenueGrowth.raw*100).toFixed(2)):null,profitMargin:fd?.profitMargins?.raw?parseFloat((fd.profitMargins.raw*100).toFixed(2)):null,dividendYield:ks?.dividendYield?.raw?parseFloat((ks.dividendYield.raw*100).toFixed(2)):null,beta:ks?.beta?.raw||null},quarters});
   }catch(err){
-    res.status(500).json({success:false, error:'Financial data unavailable', detail:err.message});
+    res.status(500).json({success:false,error:'Financial data unavailable'});
   }
 });
 
-// ─── MARKET OVERVIEW ─────────────────────────────────────────────────────────
-app.get('/api/market', async (req,res)=>{
+// ─── ROUTES: MARKET ───────────────────────────────────────────────────────────
+app.get('/api/market',async(req,res)=>{
   try{
     const indices=['^NSEI','^BSESN','GOLDBEES.NS','NIFTYBEES.NS'];
     const names=['Nifty 50','Sensex','Gold BeES','Nifty BeES'];
@@ -595,15 +650,452 @@ app.get('/api/market', async (req,res)=>{
     const market=results.map((r,i)=>{
       if(r.status!=='fulfilled') return null;
       const meta=r.value?.chart?.result?.[0]?.meta;
-      if(!meta||!meta.regularMarketPrice) return null;
-      const price=meta.regularMarketPrice, prev=meta.chartPreviousClose||price;
-      return{name:names[i],symbol:indices[i],price,prevClose:prev,
-        change:prev?parseFloat(((price-prev)/prev*100).toFixed(2)):0};
+      if(!meta?.regularMarketPrice) return null;
+      const price=meta.regularMarketPrice,prev=meta.chartPreviousClose||price;
+      return{name:names[i],symbol:indices[i],price,prevClose:prev,change:prev?parseFloat(((price-prev)/prev*100).toFixed(2)):0};
     }).filter(Boolean);
-    res.json({success:true, market});
+    res.json({success:true,market});
   }catch(err){
-    res.status(500).json({success:false, error:'Market data unavailable'});
+    res.status(500).json({success:false,error:'Market data unavailable'});
   }
 });
 
-app.listen(PORT, ()=>console.log(`Indian Stock Research API running on port ${PORT}`));
+app.listen(PORT,()=>console.log(`Indian Stock + Crypto Research API running on port ${PORT}`));
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CRYPTO SECTION — CoinGecko API (Free, no auth needed)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const CRYPTO_IDS = {
+  // ── BITCOIN & MAJOR ───────────────────────────────────────────────────────
+  'BTC':'bitcoin','BITCOIN':'bitcoin',
+  'ETH':'ethereum','ETHEREUM':'ethereum',
+  'USDT':'tether','TETHER':'tether',
+  'BNB':'binancecoin','BINANCE COIN':'binancecoin','BINANCE':'binancecoin',
+  'SOL':'solana','SOLANA':'solana',
+  'USDC':'usd-coin','USD COIN':'usd-coin',
+  'XRP':'ripple','RIPPLE':'ripple',
+  'STETH':'staked-ether','STAKED ETHER':'staked-ether',
+  'TON':'the-open-network','TONCOIN':'the-open-network','TON COIN':'the-open-network',
+  'DOGE':'dogecoin','DOGECOIN':'dogecoin',
+  'ADA':'cardano','CARDANO':'cardano',
+  'TRX':'tron','TRON':'tron',
+  'AVAX':'avalanche-2','AVALANCHE':'avalanche-2',
+  'SHIB':'shiba-inu','SHIBA INU':'shiba-inu','SHIBA':'shiba-inu',
+  'WBTC':'wrapped-bitcoin','WRAPPED BITCOIN':'wrapped-bitcoin',
+  'LINK':'chainlink','CHAINLINK':'chainlink',
+  'DOT':'polkadot','POLKADOT':'polkadot',
+  'BCH':'bitcoin-cash','BITCOIN CASH':'bitcoin-cash',
+  'NEAR':'near','NEAR PROTOCOL':'near',
+  'MATIC':'matic-network','POLYGON':'matic-network','POL':'matic-network',
+  'LTC':'litecoin','LITECOIN':'litecoin',
+  'UNI':'uniswap','UNISWAP':'uniswap',
+  'ICP':'internet-computer','INTERNET COMPUTER':'internet-computer',
+  'LEO':'leo-token','LEO TOKEN':'leo-token',
+  'DAI':'dai','ATOM':'cosmos','COSMOS':'cosmos',
+  'ETC':'ethereum-classic','ETHEREUM CLASSIC':'ethereum-classic',
+  'PEPE':'pepe',
+  'APT':'aptos','APTOS':'aptos',
+  'XLM':'stellar','STELLAR':'stellar',
+  'FIL':'filecoin','FILECOIN':'filecoin',
+  'STX':'blockstack','STACKS':'blockstack',
+  'OKB':'okb',
+  'HBAR':'hedera-hashgraph','HEDERA':'hedera-hashgraph',
+  'INJ':'injective-protocol','INJECTIVE':'injective-protocol',
+  'IMX':'immutable-x','IMMUTABLE':'immutable-x',
+  'OP':'optimism','OPTIMISM':'optimism',
+  'ARB':'arbitrum','ARBITRUM':'arbitrum',
+  'MNT':'mantle','MANTLE':'mantle',
+  'VET':'vechain','VECHAIN':'vechain',
+  'WIF':'dogwifcoin','DOG WIF HAT':'dogwifcoin',
+  'MKR':'maker','MAKER':'maker',
+  'GRT':'the-graph','THE GRAPH':'the-graph',
+  'AAVE':'aave',
+  'RUNE':'thorchain','THORCHAIN':'thorchain',
+  'ALGO':'algorand','ALGORAND':'algorand',
+  'THETA':'theta-token','THETA TOKEN':'theta-token',
+  'EGLD':'elrond-erd-2','ELROND':'elrond-erd-2','MULTIVERSX':'elrond-erd-2',
+  'FTM':'fantom','FANTOM':'fantom',
+  'SAND':'the-sandbox','SANDBOX':'the-sandbox','THE SANDBOX':'the-sandbox',
+  'MANA':'decentraland','DECENTRALAND':'decentraland',
+  'AXS':'axie-infinity','AXIE INFINITY':'axie-infinity','AXIE':'axie-infinity',
+  'FLOW':'flow',
+  'XMR':'monero','MONERO':'monero',
+  'EOS':'eos',
+  'CRO':'crypto-com-chain','CRONOS':'crypto-com-chain','CRYPTO.COM':'crypto-com-chain',
+  'XTZ':'tezos','TEZOS':'tezos',
+  'CAKE':'pancakeswap-token','PANCAKESWAP':'pancakeswap-token',
+  'SNX':'synthetix-network-token','SYNTHETIX':'synthetix-network-token',
+  'COMP':'compound-governance-token','COMPOUND':'compound-governance-token',
+  'ZEC':'zcash','ZCASH':'zcash',
+  'DASH':'dash',
+  'BAT':'basic-attention-token','BASIC ATTENTION TOKEN':'basic-attention-token',
+  'ENJ':'enjincoin','ENJIN':'enjincoin',
+  'CHZ':'chiliz','CHILIZ':'chiliz',
+  'HOT':'holotoken','HOLO':'holotoken',
+  'ZIL':'zilliqa','ZILLIQA':'zilliqa',
+  'ICX':'icon','ICON':'icon',
+  'ONT':'ontology','ONTOLOGY':'ontology',
+  'WAVES':'waves',
+  'BTT':'bittorrent','BITTORRENT':'bittorrent',
+  'WIN':'wink',
+  'SUI':'sui',
+  'SEI':'sei-network','SEI':'sei-network',
+  'TIA':'celestia','CELESTIA':'celestia',
+  'PYTH':'pyth-network','PYTH NETWORK':'pyth-network',
+  'JTO':'jito-governance-token','JITO':'jito-governance-token',
+  'WEN':'wen-4','BONK':'bonk',
+  'BLUR':'blur',
+  'DYDX':'dydx','DYDY':'dydx',
+  'GMX':'gmx',
+  'LDO':'lido-dao','LIDO':'lido-dao','LIDO DAO':'lido-dao',
+  'CRV':'curve-dao-token','CURVE':'curve-dao-token',
+  'CVX':'convex-finance','CONVEX':'convex-finance',
+  '1INCH':'1inch','1 INCH':'1inch',
+  'SUSHI':'sushi','SUSHISWAP':'sushi',
+  'YFI':'yearn-finance','YEARN':'yearn-finance',
+  'BAL':'balancer','BALANCER':'balancer',
+  'REN':'republic-protocol',
+  'KNC':'kyber-network-crystal','KYBER':'kyber-network-crystal',
+  'ZRX':'0x','0X':'0x',
+  'BAND':'band-protocol','BAND PROTOCOL':'band-protocol',
+  'UMA':'uma',
+  'NMR':'numeraire','NUMERAI':'numeraire',
+  'OXT':'orchid-protocol','ORCHID':'orchid-protocol',
+  'REQ':'request-network','REQUEST':'request-network',
+  'RLC':'iexec-rlc',
+  'ANT':'aragon','ARAGON':'aragon',
+  'MLN':'melon','ENZYME':'melon',
+  'STORJ':'storj',
+  'GNO':'gnosis','GNOSIS':'gnosis',
+  'NU':'nucypher',
+  'KEEP':'keep-network',
+  'TBTC':'tbtc',
+  'LRC':'loopring','LOOPRING':'loopring',
+  'CELR':'celer-network','CELER':'celer-network',
+  'SKL':'skale','SKALE':'skale',
+  'CTSI':'cartesi','CARTESI':'cartesi',
+  'POND':'marlin',
+  'MASK':'mask-network','MASK NETWORK':'mask-network',
+  'API3':'api3',
+  'QNT':'quant-network','QUANT':'quant-network',
+  'WOO':'woo-network','WOO NETWORK':'woo-network',
+  'GMT':'stepn','STEPN':'stepn','GREEN METAVERSE':'stepn',
+  'GST':'green-satoshi-token',
+  'FLOKI':'floki','FLOKI INU':'floki',
+  'ELON':'dogelon-mars','DOGELON':'dogelon-mars',
+  'BABYDOGE':'baby-doge-coin','BABY DOGE':'baby-doge-coin',
+  'KISHU':'kishu-inu',
+  'SAITAMA':'saitama-inu',
+  'SFM':'safemoon-2','SAFEMOON':'safemoon-2',
+  'HEX':'hex',
+  'ANKR':'ankr',
+  'COTI':'coti',
+  'OCEAN':'ocean-protocol','OCEAN PROTOCOL':'ocean-protocol',
+  'FET':'fetch-ai','FETCH AI':'fetch-ai','FETCH.AI':'fetch-ai',
+  'AGIX':'singularitynet','SINGULARITYNET':'singularitynet',
+  'NMT':'numeraire',
+  'RNDR':'render-token','RENDER':'render-token',
+  'CORE':'cvault-finance',
+  'KAS':'kaspa','KASPA':'kaspa',
+  'CFX':'conflux-token','CONFLUX':'conflux-token',
+  'ROSE':'oasis-network','OASIS':'oasis-network',
+  'MINA':'mina-protocol','MINA PROTOCOL':'mina-protocol',
+  'KAVA':'kava','KAVA FINANCE':'kava',
+  'CELO':'celo',
+  'ONE':'harmony','HARMONY':'harmony',
+  'IOTA':'iota',
+  'MIOTA':'iota',
+  'NANO':'nano',
+  'ZEN':'zencash','HORIZEN':'zencash',
+  'QTUM':'qtum',
+  'DCR':'decred','DECRED':'decred',
+  'RVN':'ravencoin','RAVENCOIN':'ravencoin',
+  'DGB':'digibyte','DIGIBYTE':'digibyte',
+  'SC':'siacoin','SIACOIN':'siacoin',
+  'XVG':'verge','VERGE':'verge',
+  'XEM':'nem','NEM':'nem',
+  'LSK':'lisk','LISK':'lisk',
+  'STEEM':'steem',
+  'HIVE':'hive',
+  'KSM':'kusama','KUSAMA':'kusama',
+  'MOVR':'moonriver','MOONRIVER':'moonriver',
+  'GLMR':'moonbeam','MOONBEAM':'moonbeam',
+  'ACA':'acala','ACALA':'acala',
+  'PHA':'phala-network','PHALA':'phala-network',
+  'XCM':'xcm','INTERLAY':'interlay',
+  'NOT':'notcoin','NOTCOIN':'notcoin',
+  'WLD':'worldcoin-wld','WORLDCOIN':'worldcoin-wld',
+  'STRK':'starknet','STARKNET':'starknet',
+  'PIXEL':'pixels','PIXELS':'pixels',
+  'PORTAL':'portal-fantasy',
+  'ALT':'altlayer','ALTLAYER':'altlayer',
+  'DYM':'dymension','DYMENSION':'dymension',
+  'MANTA':'manta-network','MANTA':'manta-network',
+  'JUP':'jupiter-exchange-solana','JUPITER':'jupiter-exchange-solana',
+  'ZETA':'zetachain','ZETACHAIN':'zetachain',
+  'IO':'io-net','IO.NET':'io-net',
+  'ZK':'zksync','ZKSYNC':'zksync',
+  'EIGEN':'eigenlayer','EIGENLAYER':'eigenlayer',
+  'GRASS':'grass','GRASS TOKEN':'grass',
+  'HMSTR':'hamster-kombat','HAMSTER KOMBAT':'hamster-kombat','HAMSTER':'hamster-kombat',
+  'CATI':'catizen','CATIZEN':'catizen',
+  'DOGS':'dogs-2','DOGS TOKEN':'dogs-2',
+  'MAJOR':'major','MAJOR TOKEN':'major',
+  'PNUT':'peanut-the-squirrel','PEANUT':'peanut-the-squirrel',
+  'ACT':'act-i-the-ai-prophecy',
+  'GOAT':'goat','GOAT TOKEN':'goat',
+  'NEIRO':'neiro-on-eth',
+  'MOODENG':'moo-deng','MOO DENG':'moo-deng',
+  'SPX':'spx6900',
+  'POPCAT':'popcat',
+  'MEW':'cat-in-a-dogs-world',
+  'BOME':'book-of-meme',
+  'SLERF':'slerf',
+  'TAO':'bittensor','BITTENSOR':'bittensor',
+  'ARKM':'arkham','ARKHAM':'arkham',
+  'ONDO':'ondo-finance','ONDO FINANCE':'ondo-finance',
+  'PENDLE':'pendle',
+  'ENA':'ethena','ETHENA':'ethena',
+  'ETHFI':'ether-fi','ETHER.FI':'ether-fi',
+  'REZ':'renzo','RENZO':'renzo',
+  'OMNI':'omni-network','OMNI NETWORK':'omni-network',
+  'BB':'bouncebit','BOUNCEBIT':'bouncebit',
+  'SAGA':'saga-2','SAGA':'saga-2',
+  'LISTA':'lista-dao',
+  'ZROLIST':'layerzero','LAYERZERO':'layerzero',
+  'ZRO':'layerzero',
+  'BANANA':'banana-gun','BANANA GUN':'banana-gun',
+  'AEVO':'aevo','AEVO EXCHANGE':'aevo',
+  'W':'wormhole','WORMHOLE':'wormhole',
+  'PYUSD':'paypal-usd','PAYPAL USD':'paypal-usd',
+  'EURC':'euro-coin',
+  'GNS':'gains-network','GAINS':'gains-network',
+  'RDNT':'radiant-capital','RADIANT':'radiant-capital',
+  'VELO':'velo',
+  'LADYS':'milady-meme-coin',
+  'TURBO':'turbo',
+  'WOJAK':'wojak',
+  'BOB':'bob',
+  'BALD':'bald',
+  'TOSHI':'toshi',
+  'BRETT':'brett',
+  'HIGHER':'higher',
+  'DEGEN':'degen-base',
+  'NORMIE':'normie',
+  'MOG':'mog-coin','MOG COIN':'mog-coin',
+  'PONKE':'ponke',
+  'MOTHER':'mother-iggy',
+  'BILLY':'billy',
+  'FWOG':'fwog',
+  'GIGA':'gigachad-2','GIGACHAD':'gigachad-2',
+  'NEIRO_SOL':'neiro',
+  'PUPS':'pups-ordinals',
+  'PIZZA':'pizza',
+  'MICE':'mice-coin',
+  'MICHI':'michi',
+  'TNSR':'tensor','TENSOR':'tensor',
+  'WBTC_NEW':'wrapped-bitcoin',
+  'SOLVBTC':'solv-btc',
+  'LBTC':'lombard-staked-btc',
+  'CBBTC':'coinbase-wrapped-btc',
+  'INR':'indian-rupee-stablecoin',
+};
+
+
+function resolveCrypto(input){
+  const u = input.toUpperCase().trim();
+  if(CRYPTO_IDS[u]) return CRYPTO_IDS[u];
+  const keys = Object.keys(CRYPTO_IDS);
+  const found = keys.find(k => u.includes(k) || k.includes(u));
+  if(found) return CRYPTO_IDS[found];
+  return u.toLowerCase();
+}
+
+const CG = 'https://api.coingecko.com/api/v3';
+const CG_HEADERS = { 'Accept':'application/json', 'User-Agent':'Mozilla/5.0' };
+
+// ─── CRYPTO MAIN DATA ────────────────────────────────────────────────────────
+app.get('/api/crypto/:coin', async (req, res) => {
+  try {
+    const coinId = resolveCrypto(req.params.coin);
+
+    // Fetch coin data + 90 day chart in parallel
+    const [coinRes, chartRes] = await Promise.allSettled([
+      axios.get(`${CG}/coins/${coinId}?localization=false&tickers=false&community_data=false&developer_data=false`, {
+        headers: CG_HEADERS, timeout: 12000
+      }),
+      axios.get(`${CG}/coins/${coinId}/market_chart?vs_currency=inr&days=90&interval=daily`, {
+        headers: CG_HEADERS, timeout: 12000
+      })
+    ]);
+
+    if(coinRes.status !== 'fulfilled') throw new Error('Coin not found: ' + coinId);
+    const coin = coinRes.value.data;
+    const md   = coin.market_data;
+
+    // Current prices
+    const priceINR = md.current_price?.inr || 0;
+    const priceUSD = md.current_price?.usd || 0;
+    const change1d = md.price_change_percentage_24h || 0;
+    const change7d = md.price_change_percentage_7d  || 0;
+    const change30d= md.price_change_percentage_30d || 0;
+
+    // Chart data
+    let closes = [], chartData = [], volumes = [];
+    if(chartRes.status === 'fulfilled'){
+      const prices = chartRes.value.data.prices || [];
+      const vols   = chartRes.value.data.total_volumes || [];
+      closes    = prices.map(p => p[1]);
+      chartData = prices.map(p => ({ t: p[0], c: parseFloat(p[1].toFixed(2)) }));
+      volumes   = vols.map(v => v[1]);
+    }
+
+    // Technical indicators (same as stocks)
+    const rsi   = calcRSI(closes);
+    const macd  = calcMACD(closes);
+    const bb    = calcBollingerBands(closes);
+    const sma20 = calcSMA(closes, 20);
+    const sma50 = calcSMA(closes, 50);
+    const atr   = closes.length > 14
+      ? parseFloat((closes.slice(-14).reduce((max, v, i, arr) => {
+          if(i === 0) return max;
+          return max + Math.abs(v - arr[i-1]);
+        }, 0) / 14).toFixed(2))
+      : null;
+
+    // Build OHLCV from daily closes for pattern detection
+    const ohlcv = closes.slice(-10).map((c, i, arr) => ({
+      open:  i > 0 ? arr[i-1] : c,
+      high:  Math.max(c, i > 0 ? arr[i-1] : c) * 1.005,
+      low:   Math.min(c, i > 0 ? arr[i-1] : c) * 0.995,
+      close: c
+    }));
+    const patterns = detectCandlePatterns(ohlcv);
+    const signal   = generateSignal(rsi, macd, sma20, sma50, priceINR, change7d);
+
+    // Last 7 days
+    const last7 = chartData.slice(-7).map(d => ({
+      date:  new Date(d.t).toLocaleDateString('en-IN', { day:'numeric', month:'short' }),
+      close: parseFloat(d.c.toFixed(2)),
+      change: 0
+    })).map((d, i, arr) => ({
+      ...d,
+      change: i > 0 ? parseFloat(((d.close - arr[i-1].close) / arr[i-1].close * 100).toFixed(2)) : 0
+    }));
+
+    // Stability score (lower volatility = more stable)
+    const volatility = md.price_change_percentage_30d ? Math.abs(md.price_change_percentage_30d) : 50;
+    const stabilityScore = Math.max(0, Math.min(100, Math.round(100 - volatility)));
+
+    res.json({
+      success: true,
+      coinId,
+      name:   coin.name,
+      symbol: coin.symbol?.toUpperCase(),
+      image:  coin.image?.small,
+      price: {
+        inr:      parseFloat(priceINR.toFixed(2)),
+        usd:      parseFloat(priceUSD.toFixed(4)),
+        change1d: parseFloat(change1d.toFixed(2)),
+        change7d: parseFloat(change7d.toFixed(2)),
+        change30d:parseFloat(change30d.toFixed(2)),
+        high24h:  md.high_24h?.inr || null,
+        low24h:   md.low_24h?.inr  || null,
+        ath:      md.ath?.inr      || null,
+        athChange:md.ath_change_percentage?.inr || null,
+        atl:      md.atl?.inr      || null,
+      },
+      market: {
+        cap:           md.market_cap?.inr        || null,
+        capUsd:        md.market_cap?.usd        || null,
+        volume24h:     md.total_volume?.inr      || null,
+        circulatingSupply: md.circulating_supply || null,
+        totalSupply:   md.total_supply           || null,
+        maxSupply:     md.max_supply             || null,
+        rank:          coin.market_cap_rank      || null,
+        stabilityScore
+      },
+      indicators: { rsi, macd, bb, sma20, sma50, atr },
+      patterns,
+      signal,
+      chartData,
+      last7,
+      description: coin.description?.en?.slice(0, 400) || '',
+      updatedAt: new Date().toISOString()
+    });
+  } catch(err) {
+    console.error('Crypto error:', err.message);
+    res.status(500).json({ success: false, error: 'Could not fetch crypto data. Check the coin name and try again.', detail: err.message });
+  }
+});
+
+// ─── CRYPTO MARKET OVERVIEW ───────────────────────────────────────────────────
+app.get('/api/crypto/market/overview', async (req, res) => {
+  try {
+    const { data } = await axios.get(
+      `${CG}/coins/markets?vs_currency=inr&order=market_cap_desc&per_page=20&page=1&price_change_percentage=24h,7d`,
+      { headers: CG_HEADERS, timeout: 12000 }
+    );
+    const coins = data.map(c => ({
+      id:       c.id,
+      name:     c.name,
+      symbol:   c.symbol?.toUpperCase(),
+      image:    c.image,
+      priceINR: c.current_price,
+      priceUSD: null,
+      change1d: parseFloat((c.price_change_percentage_24h || 0).toFixed(2)),
+      change7d: parseFloat((c.price_change_percentage_7d_in_currency || 0).toFixed(2)),
+      marketCap:c.market_cap,
+      volume:   c.total_volume,
+      rank:     c.market_cap_rank
+    }));
+    res.json({ success: true, coins });
+  } catch(err) {
+    res.status(500).json({ success: false, error: 'Crypto market overview unavailable' });
+  }
+});
+
+// ─── CRYPTO NEWS ─────────────────────────────────────────────────────────────
+app.get('/api/crypto/news/:query', async (req, res) => {
+  try {
+    const query = encodeURIComponent(req.params.query + ' cryptocurrency crypto price');
+    const rssUrl = `https://news.google.com/rss/search?q=${query}&hl=en-IN&gl=IN&ceid=IN:en`;
+    const { data } = await axios.get(rssUrl, { headers: CG_HEADERS, timeout: 8000 });
+    const items = [];
+    const matches = data.matchAll(/<item>([\s\S]*?)<\/item>/g);
+    for(const match of matches){
+      const c = match[1];
+      const title  = (c.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) || c.match(/<title>(.*?)<\/title>/))?.[1] || '';
+      const link   = (c.match(/<link>(.*?)<\/link>/))?.[1] || '';
+      const source = (c.match(/<source[^>]*>(.*?)<\/source>/))?.[1] || 'Google News';
+      const pubDate= (c.match(/<pubDate>(.*?)<\/pubDate>/))?.[1] || '';
+      if(title) items.push({ title: title.trim(), link, source: source.trim(), pubDate });
+      if(items.length >= 8) break;
+    }
+    const pos = ['surge','gain','bullish','rise','rally','buy','up','high','growth','adoption','breakthrough'];
+    const neg = ['crash','fall','drop','bearish','sell','ban','hack','scam','fear','low','lose','plunge'];
+    const analyzed = items.map(item => {
+      const text = item.title.toLowerCase();
+      const p = pos.filter(w => text.includes(w)).length;
+      const n = neg.filter(w => text.includes(w)).length;
+      return { ...item, sentiment: p > n ? 'positive' : n > p ? 'negative' : 'neutral' };
+    });
+    res.json({ success: true, news: analyzed });
+  } catch(err) {
+    res.status(500).json({ success: false, news: [], error: 'News unavailable' });
+  }
+});
+
+// ─── CRYPTO SEARCH ────────────────────────────────────────────────────────────
+app.get('/api/crypto/search/:query', (req, res) => {
+  const q = req.params.query.toUpperCase().trim();
+  const results = [];
+  Object.entries(CRYPTO_IDS).forEach(([name, id]) => {
+    if(name.includes(q) || q.includes(name)){
+      if(!results.find(r => r.id === id))
+        results.push({ name, symbol: name, id });
+    }
+  });
+  res.json({ success: true, results: results.slice(0, 8) });
+});
